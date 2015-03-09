@@ -8,13 +8,30 @@
   [![NPM Downloads][downloads-image]][downloads-url]
 
 ## Installation
+
 ```bash
 $ npm install data-storm
 ```
 
+## Basic Usage
+
+```coffeescript
+DS = require 'data-storm'
+
+class Song extends DS.Model
+  @name: @attr 'string'
+  
+class MusicLibrary extends DS.Model
+  @songs: @hasMany Song
+
+music = new MusicLibrary
+music.set 'songs', [ (new Song name: 'November Rain') ]
+music.serialize()
+```
+
 ## Literate Coffeescript Documentation
 
-* [DATA STORM](src/data-storm.litcoffee)
+* [Main Module](src/data-storm.litcoffee)
 
 ### STORM Data Entities
 * [STORM Model](src/model.litcoffee)
