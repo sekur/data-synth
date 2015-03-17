@@ -1,6 +1,6 @@
 {
   "name": "data-storm",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "STORM data models that represent hierarchical data structures with dynamic interfaces",
   "author": "Peter K Lee <peter@intercloud.net>",
   "main": "lib/data-storm.js",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/stormstack/data-storm",
   "dependencies": {
-		"meta-class": ">=0.1.4",
+		"meta-class": ">=0.1.6",
     "node-uuid": "1.4.1",
     "promise": "^6.0.1"
   }
