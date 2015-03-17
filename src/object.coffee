@@ -16,11 +16,11 @@ class StormObject extends StormClass
   constructor: (data, @opts={}, @container) ->
     @_properties = {}
     for key, StormConstructor of @constructor when key isnt 'constructor' and StormConstructor?.meta?.storm?
-      input = switch (StormConstructor.get 'storm')
-        when 'object' then 'data'
-        else 'type'
+      StormType = switch (StormConstructor.get 'storm')
+        when 'object' then StormConstructor.get 'data'
+        else StormConstructor.get 'type'
 
-      @addProperty key, (new StormConstructor (StormConstructor.get input), (StormConstructor.get 'opts'), this)
+      @addProperty key, (new StormConstructor StormType, (StormConstructor.get 'opts'), this)
 
     # initialize all properties to defaultValues
     @everyProperty (key) -> @set undefined, skipValidation: true

@@ -1,6 +1,6 @@
 {
   "name": "data-storm",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "STORM data models that represent hierarchical data structures with dynamic interfaces",
   "author": "Peter K Lee <peter@intercloud.net>",
   "main": "lib/data-storm.js",
