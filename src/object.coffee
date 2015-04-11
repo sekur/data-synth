@@ -7,11 +7,13 @@ class StormObject extends StormClass
 
   @attr = (type, opts) ->
     class extends StormProperty
-      @set type: type, opts: opts
+      @set type: type
+      @merge opts
 
   @computed  = (func, opts) ->
     class extends ComputedProperty
-      @set type: func, opts: opts
+      @set type: func
+      @merge opts
 
   constructor: (data, @opts={}, @container) ->
     @_properties = {}
@@ -20,7 +22,7 @@ class StormObject extends StormClass
         when 'object' then StormConstructor.get 'data'
         else StormConstructor.get 'type'
 
-      @addProperty key, (new StormConstructor StormType, (StormConstructor.get 'opts'), this)
+      @addProperty key, (new StormConstructor StormType, null,  this)
 
     # initialize all properties to defaultValues
     @everyProperty (key) -> @set undefined, skipValidation: true

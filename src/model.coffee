@@ -54,12 +54,6 @@ class StormModel extends (require './object')
     class extends (require './property/action')
       @set func: func, opts: opts
 
-  # default schema for all StormModels
-  @id:         @attr 'string', private: true, defaultValue: -> (require 'node-uuid').v4()
-  @createdOn:  @attr 'date', private: true, defaultValue: -> new Date
-  @modifiedOn: @attr 'date', private: true, defaultValue: -> new Date
-  @accessedOn: @attr 'date', private: true, defaultValue: -> new Date
-
   # internal tracking of bound model records
   @_bindings: @hasMany StormModel, private: true
 
@@ -68,7 +62,7 @@ class StormModel extends (require './object')
   # undocumented)
   #
   # It is publicly accessible via the DataStorm class
-  _models: new ModelRegistry
+  #_models: new ModelRegistry
 
   constructor: ->
     super

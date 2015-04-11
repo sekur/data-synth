@@ -9,7 +9,7 @@ class StormProperty extends StormClass
 
   kind: 'attr'
 
-  constructor: (@type, @opts={}, @obj) ->
+  constructor: (@type, @opts=@constructor.meta, @obj) ->
     assert @obj instanceof (require './object'),
         "cannot register a new property without a reference to an object it belongs to"
 

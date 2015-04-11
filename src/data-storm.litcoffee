@@ -8,6 +8,7 @@ This module is a meta collection of various class objects that
 represent the various data entity constructs.
 
     module.exports =
+      #Store: require './store'
       Model: require './model'
       Object: require './object'
       Property: require './property'

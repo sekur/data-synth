@@ -5,27 +5,25 @@ The `DataStore` represents the primary container construct for managing various 
     ModelRegistry = require './registry/model'
 
     class DataStore extends (require './model')
-      @set storm: 'store', models: new ModelRegistry
+      @set storm: 'store', registry: new ModelRegistry
+      @include (require 'events').EventEmitter
 
       # Storm default properties schema
       #logfile:   @attr 'string', defaultValue: @computed -> "/tmp/#{@constructor.name}-#{@get('id')}.log"
       @loglevel: @attr 'string', defaultValue: 'info'
       @datadir:  @attr 'string', defaultValue: '/tmp'
 
-      # Allows this DataStorm to be changed via API calls (future)
-      #isMutable: @attr 'boolean', defaultValue: true
-
       # DataStore can have collection of other stores
       @stores: @hasMany DataStore, private: true
 
       # DataStorm auto-computed properties
-      @models: @computed (-> (@constructor.get 'models').serialize() )
+      @models: @computed (-> (@constructor.get 'registry').serialize() )
 
 The below `register` for DataStore accepts one or more models and adds
 to internal `ModelRegistry` instance.
 
       register: (models...) ->
-        (@constructor.get 'models').register model for model in models
+        (@constructor.get 'registry').register model for model in models
 
 PUBLIC access methods for working directly with PRIVATE _models registry
 
