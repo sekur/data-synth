@@ -1,9 +1,11 @@
 assert = require 'assert'
 
+# XXX - need to fix this class
+
 class ActionProperty extends (require '../property')
   @set storm: 'action'
+  @merge options: [ 'exec' ]
 
-  kind: 'action'
 
   exec: -> throw new Error "undefined action"
 

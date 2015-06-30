@@ -1,20 +1,9 @@
 {
   "name": "data-storm",
-  "version": "0.2.5",
+  "version": "0.3.1",
   "description": "STORM data models that represent hierarchical data structures with dynamic interfaces",
   "author": "Peter K Lee <peter@intercloud.net>",
-  "main": "lib/data-storm.js",
-  "directories": {
-    "example": "examples",
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "mocha test",
-    "prepublish": "mkdir -p lib; coffee -o lib -c src"
-  },
-  "devDependencies": {
-    "coffee-script": ">=1.7"
-  },
+  "homepage": "https://github.com/stormstack/data-storm",
   "repository": {
     "type": "git",
     "url": "http://github.com/stormstack/data-storm"
@@ -28,13 +17,24 @@
     "model"
   ],
   "license": "MIT",
+  "main": "lib/data-storm.js",
+  "dependencies": {
+		"meta-class": ">=0.1.7",
+    "node-uuid": "1.4.1",
+    "promise": "^6.0.1"
+  },
+  "devDependencies": {
+    "coffee-script": ">=1.7"
+  },
   "bugs": {
     "url": "https://github.com/stormstack/data-storm/issues"
   },
-  "homepage": "https://github.com/stormstack/data-storm",
-  "dependencies": {
-		"meta-class": ">=0.1.6",
-    "node-uuid": "1.4.1",
-    "promise": "^6.0.1"
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha test",
+    "prepublish": "mkdir -p lib; coffee -o lib -c src"
   }
 }

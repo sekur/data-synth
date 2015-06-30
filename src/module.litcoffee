@@ -1,11 +1,11 @@
-# DataStore
+# StormModule
 
-The `DataStore` represents the primary container construct for managing various `DataModels`.
+The `StormModule` represents the primary container construct for managing various `StormModels`.
 
     ModelRegistry = require './registry/model'
 
-    class DataStore extends (require './model')
-      @set storm: 'store', registry: new ModelRegistry
+    class StormModule extends (require './model')
+      @set storm: 'module', registry: new ModelRegistry
       @include (require 'events').EventEmitter
 
       # Storm default properties schema
@@ -18,6 +18,51 @@ The `DataStore` represents the primary container construct for managing various 
 
       # DataStorm auto-computed properties
       @models: @computed (-> (@constructor.get 'registry').serialize() )
+
+The `configure` function accepts a function as an argument which will apply
+against this class for setup/initialization.
+
+      @configure = (func) ->
+        func?.apply? this
+        this
+
+      @run = (process, opts) ->
+        argv = require('minimist')(process.argv.slice(2), opts)
+        if argv.h?
+          console.log """
+            #{@get 'name'} [opts] [command] [target]
+
+            [opts]
+            -h view this help
+            -l level:logfile (e.g. info:/some/file/path, )
+              log level: trace, debug, info (default), warn, error
+              when not set, will run in 'debug' level to console
+            -c address:port (e.g. remote-address:12345)
+            -s address:port (e.g. localhost:5000)
+
+            [command]
+            build - create a new module specified in [target]
+
+            [target]
+            directory - build contents inside target directory (such as .)
+            filename  - build according to specified build file (e.g. storm.json)
+          """
+          return
+
+        config =
+          port:    argv.p ? 8080
+          logfile: argv.l ? "/tmp/stormrunner.log"
+          loglevel: if argv.z in [ 'trace','debug','info','warn','error' ] then argv.z else 'info'
+
+        [ command, target ] = argv._
+
+        instance = new this config
+        switch command
+          when 'build'
+            target ?= '.'
+            instance.invoke command, target
+            .then (output) ->
+        
 
 The below `register` for DataStore accepts one or more models and adds
 to internal `ModelRegistry` instance.

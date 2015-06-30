@@ -1,3 +1,6 @@
+
+Array::equals = (x) -> @length is x.length and @every (e, i) -> e is x[i]
+
 Array::unique = ->
     return @ unless @length > 0
     output = {}
@@ -40,7 +43,7 @@ Array::pushRecord = (record) ->
     return null if typeof record isnt "object"
     @push record unless @contains(id:record.id)
 
-class StormClass extends (require 'meta-class')
+class StormClass extends (require './meta')
   @set storm: 'class'
   @toJSON: (type='storm', tag=true) ->
     o = {}

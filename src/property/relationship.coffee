@@ -1,24 +1,19 @@
-StormClass = require '../class'
 assert = require 'assert'
 
 class RelationshipProperty extends (require '../property')
-  @set storm: 'relation'
+  @set storm: 'relation', embedded: false
+  @merge options: [ 'model', 'kind', 'embedded' ]
 
-  kind: null
+  constructor: ->
+    super
 
-  constructor: (@model, opts={}, obj) ->
-    assert typeof @model?.constructor is 'function',
-        "cannot register a new relationship without proper model class"
-    assert obj instanceof StormClass,
-        "cannot register a new relationship without containing obj defined"
+    assert @opts.model instanceof Function,
+        "cannot instantiate a new relationship without proper model class"
+        
+    @opts.type ?= switch @opts.kind
+      when 'belongsTo' then 'string'
+      when 'hasMany' then 'array'
 
-    type = switch @kind
-        when 'belongsTo' then 'string'
-        when 'hasMany' then 'array'
-
-    opts.unique = true if @kind is 'hasMany'
-    super type, opts, obj
-
-  #serialize: -> super @get()
+    @model = @opts.model
 
 module.exports = RelationshipProperty

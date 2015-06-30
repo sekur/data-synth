@@ -1,16 +1,10 @@
 
 class BelongsToProperty extends (require './relationship')
-  @set storm: 'belongsTo'
-
-  kind: 'belongsTo'
+  @set kind: 'belongsTo'
 
   get: -> @model::fetch super
 
-  validate:  (value=@value) -> (super value) is true and (not value? or @model::fetch value instanceof @model)
-  normalize: (value) ->
-    # console.log 'belongsTo.normalize'
-    # console.log value
-    # console.log (value instanceof @model)
+  normalize: (value=@get()) ->
     switch
       when not value? then undefined
       when value instanceof @model then value.get 'id'
@@ -23,9 +17,11 @@ class BelongsToProperty extends (require './relationship')
         @normalize record
       else undefined
 
-  serialize: (format='json') ->
+  validate:  (value=@get()) -> (super value) is true and (not value? or @model::fetch value instanceof @model)
+
+  serialize: (value=@get(), opts={}) ->
     if @opts.embedded is true
-      @get().serialize format
+      value?.serialize? opts
     else
       super
 
