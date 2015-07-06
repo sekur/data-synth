@@ -1,7 +1,7 @@
 assert = require 'assert'
 
 class ComputedProperty extends (require '../property')
-  @set storm: 'computed', cache: 0
+  @set synth: 'computed', cache: 0
   @merge options: [ 'cache', 'func' ]
 
   constructor: ->

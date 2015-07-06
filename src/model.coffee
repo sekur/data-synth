@@ -1,6 +1,6 @@
-StormRegistry = require './registry'
+Registry = require './registry'
 
-class ModelRegistryProperty extends StormRegistry.Property
+class ModelRegistryProperty extends Registry.Property
 
   constructor: (@model, opts, obj) -> super 'object', opts, obj
 
@@ -17,7 +17,7 @@ class ModelRegistryProperty extends StormRegistry.Property
     ids: Object.keys(@value)
     numRecords: Object.keys(@value).length
 
-class ModelRegistry extends StormRegistry
+class ModelRegistry extends Registry
 
   @Property = ModelRegistryProperty
 
@@ -29,18 +29,18 @@ class ModelRegistry extends StormRegistry
 
   add: (records...) ->
     obj = {}
-    obj[record.get('id')] = record for record in records when record instanceof StormModel
+    obj[record.get('id')] = record for record in records when record instanceof Model
     super record.constructor.meta.name, obj
 
   remove: (records...) ->
-    query = (record.get('id') for record in records when record instanceof StormModel)
+    query = (record.get('id') for record in records when record instanceof Model)
     super record.constructor.meta.name, query
 
   contains: (key) -> (@getProperty key)
 
 
-class StormModel extends (require './object')
-  @set storm: 'model'
+class SynthModel extends (require './object')
+  @set synth: 'model'
 
   @belongsTo = (model, opts) ->
     class extends (require './property/belongsTo')
@@ -55,13 +55,13 @@ class StormModel extends (require './object')
       @set func: func, opts: opts
 
   # internal tracking of bound model records
-  @_bindings: @hasMany StormModel, private: true
+  @_bindings: @hasMany SynthModel, private: true
 
   # this is a PRIVATE shared prototype singleton ModelRegistry
   # instance visible across ALL model instances (intentionally
   # undocumented)
   #
-  # It is publicly accessible via the DataStorm class
+  # It is publicly accessible via the DataSynth class
   #_models: new ModelRegistry
 
   constructor: ->
@@ -88,7 +88,7 @@ class StormModel extends (require './object')
   ###
   bind: (records...) ->
     for record in records
-      continue unless record? and record instanceof StormModel
+      continue unless record? and record instanceof SynthModel
       (@getProperty '_bindings').push record.save()
 
   match: (query) ->
@@ -125,4 +125,4 @@ class StormModel extends (require './object')
       catch err
         reject err
 
-module.exports = StormModel
+module.exports = SynthModel

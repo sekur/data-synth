@@ -1,23 +1,23 @@
 {
-  "name": "data-storm",
-  "version": "0.3.1",
-  "description": "STORM data models that represent hierarchical data structures with dynamic interfaces",
-  "author": "Peter K Lee <peter@intercloud.net>",
-  "homepage": "https://github.com/stormstack/data-storm",
+  "name": "data-synth",
+  "version": "0.5.0",
+  "description": "Dynamic data model synthesizer",
+  "author": "Peter K Lee <peter@corenova.com>",
+  "homepage": "https://github.com/saintkepha/data-synth",
   "repository": {
     "type": "git",
-    "url": "http://github.com/stormstack/data-storm"
+    "url": "http://github.com/saintkepha/data-synth"
+  },
+  "bugs": {
+    "url": "https://github.com/saintkepha/data-synth/issues"
   },
   "keywords": [
-    "stormify",
-    "stormstack",
-    "data-storm",
     "datastore",
     "datamodel",
     "model"
   ],
   "license": "MIT",
-  "main": "lib/data-storm.js",
+  "main": "lib/data-synth.js",
   "dependencies": {
 		"meta-class": ">=0.1.7",
     "node-uuid": "1.4.1",
@@ -25,9 +25,6 @@
   },
   "devDependencies": {
     "coffee-script": ">=1.7"
-  },
-  "bugs": {
-    "url": "https://github.com/stormstack/data-storm/issues"
   },
   "directories": {
     "example": "examples",

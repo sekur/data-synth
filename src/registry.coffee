@@ -48,7 +48,7 @@ class RegistryProperty extends (require './property')
 EventEmitter = require('events').EventEmitter
 
 ###*
-# StormRegistry
+# SynthRegistry
 #
 # map of key: RegistryProperty
 #
@@ -59,7 +59,7 @@ EventEmitter = require('events').EventEmitter
 # update()
 # remove()
 ###
-class StormRegistry extends (require './object')
+class SynthRegistry extends (require './object')
   @set storm: 'registry'
   @include EventEmitter
 
@@ -75,4 +75,4 @@ class StormRegistry extends (require './object')
 
   remove: (key, query) -> (@getProperty key)?.remove query
 
-module.exports = StormRegistry
+module.exports = SynthRegistry

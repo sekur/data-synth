@@ -1,7 +1,7 @@
 assert = require 'assert'
 
 class RelationshipProperty extends (require '../property')
-  @set storm: 'relation', embedded: false
+  @set synth: 'relation', embedded: false
   @merge options: [ 'model', 'kind', 'embedded' ]
 
   constructor: ->

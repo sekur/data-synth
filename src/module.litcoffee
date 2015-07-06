@@ -1,14 +1,14 @@
-# StormModule
+# SynthModule
 
-The `StormModule` represents the primary container construct for managing various `StormModels`.
+The `SynthModule` represents the primary container construct for managing various `Models`.
 
     ModelRegistry = require './registry/model'
 
-    class StormModule extends (require './model')
-      @set storm: 'module', registry: new ModelRegistry
+    class SynthModule extends (require './model')
+      @set synth: 'module', registry: new ModelRegistry
       @include (require 'events').EventEmitter
 
-      # Storm default properties schema
+      # default properties schema
       #logfile:   @attr 'string', defaultValue: @computed -> "/tmp/#{@constructor.name}-#{@get('id')}.log"
       @loglevel: @attr 'string', defaultValue: 'info'
       @datadir:  @attr 'string', defaultValue: '/tmp'
@@ -16,7 +16,7 @@ The `StormModule` represents the primary container construct for managing variou
       # DataStore can have collection of other stores
       @stores: @hasMany DataStore, private: true
 
-      # DataStorm auto-computed properties
+      # auto-computed properties
       @models: @computed (-> (@constructor.get 'registry').serialize() )
 
 The `configure` function accepts a function as an argument which will apply
@@ -45,13 +45,13 @@ against this class for setup/initialization.
 
             [target]
             directory - build contents inside target directory (such as .)
-            filename  - build according to specified build file (e.g. storm.json)
+            filename  - build according to specified build file (e.g. synth.json)
           """
           return
 
         config =
           port:    argv.p ? 8080
-          logfile: argv.l ? "/tmp/stormrunner.log"
+          logfile: argv.l ? "/tmp/synth.log"
           loglevel: if argv.z in [ 'trace','debug','info','warn','error' ] then argv.z else 'info'
 
         [ command, target ] = argv._
@@ -79,7 +79,7 @@ PUBLIC access methods for working directly with PRIVATE _models registry
 
       contains: (key) ->
         prop = @getProperty key
-        prop if prop instanceof StormModel.Registry.Property
+        prop if prop instanceof Model.Registry.Property
 
       infuse: (opts) ->
         console.log "using: #{opts?.source}"
@@ -89,7 +89,7 @@ PUBLIC access methods for working directly with PRIVATE _models registry
 
   # opens the store according to the provided requestor access constraints
   # this should be subclassed for view control based on requestor
-  open: (requestor) -> new StormView @, requestor
+  open: (requestor) -> new View @, requestor
 
   # register callback for being called on specific event against a collection
   #
@@ -128,4 +128,4 @@ PUBLIC access methods for working directly with PRIVATE _models registry
           @log.info method:"commit", id:record.id, "#{action} '%s' on the store registry", record.constructor.name
 
 
-module.exports = DataStorm
+module.exports = SynthModule

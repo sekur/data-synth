@@ -1,6 +1,6 @@
-# DATA STORM module
+# DATA SYNTH module
 
-The DATA STORM module is a JS class hierarchy framework that provides
+The DATA SYNTH module is a JS class hierarchy framework that provides
 hierarchical grouping representation of models, objects, and
 properties for describing relationships and state/config data.
 
@@ -9,10 +9,17 @@ represent the various data entity constructs.
 
     exports = module.exports = require './module'
 
+Container-based Data Entities
+
     #exports.View = require './view'
     exports.Controller   = require './controller'
     exports.Model        = require './model'
     exports.Object       = require './object'
+    exports.Registry     = require './registry'
+    exports.Meta         = require './meta'
+
+Property-based Data Entities
+    
     exports.Property     = require './property'
     exports.Array        = require './property'
     exports.Action       = require './property/action'
@@ -20,9 +27,3 @@ represent the various data entity constructs.
     exports.Relationship = require './property/relationship'
     exports.BelongsTo    = require './property/belongsTo'
     exports.HasMany      = require './property/hasMany'
-    exports.Registry     = require './registry'
-    exports.Meta         = require './meta'
-
-    # XXX -the below two should be deprecated...
-    exports.Class        = require './class'
-    exports.Promise =     require 'promise'

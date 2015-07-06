@@ -1,6 +1,6 @@
 
-class StormObject extends (require './meta')
-  @set storm: 'object'
+class SynthObject extends (require './meta')
+  @set synth: 'object'
 
   @attr = (type, opts) ->
     class extends (require './property')
@@ -51,4 +51,4 @@ class StormObject extends (require './meta')
     keys.some (prop) -> ~dirty.indexOf prop
     ###
 
-module.exports = StormObject
+module.exports = SynthObject

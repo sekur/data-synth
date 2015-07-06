@@ -1,7 +1,7 @@
 assert = require 'assert'
 
-class StormProperty extends (require './meta')
-  @set storm: 'property', required: false, unique: false
+class SynthProperty extends (require './meta')
+  @set synth: 'property', required: false, unique: false
   @set options: [
     'type', 'required', 'unique', 'defaultValue', 'normalizer', 'validator', 'serializer'
   ]
@@ -72,4 +72,4 @@ class StormProperty extends (require './meta')
     else
       value
 
-module.exports = StormProperty
+module.exports = SynthProperty

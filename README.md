@@ -1,8 +1,8 @@
-# data-storm
+# data-synth
 
-  STORM data models that represent hierarchical data structures with
-  dynamic getter/setter interfaces and persistence layer for
-  [node](http://nodejs.org).
+  Dynamic data model synthesizer that can represent hierarchical data
+  structures with dynamic getter/setter interfaces and persistence
+  layer for [node](http://nodejs.org).
 
   [![NPM Version][npm-image]][npm-url]
   [![NPM Downloads][downloads-image]][downloads-url]
@@ -10,13 +10,13 @@
 ## Installation
 
 ```bash
-$ npm install data-storm
+$ npm install data-synth
 ```
 
 ## Basic Usage
 
 ```coffeescript
-DS = require 'data-storm'
+DS = require 'data-synth'
 
 class Song extends DS.Model
   @name: @attr 'string'
@@ -31,25 +31,25 @@ music.serialize()
 
 ## Literate Coffeescript Documentation
 
-* [Main Module](src/data-storm.litcoffee)
+* [Main Module](src/data-synth.litcoffee)
 
-### STORM Data Entities
-* [STORM Model](src/model.litcoffee)
-* [STORM Object](src/object.litcoffee)
-* [STORM Class](src/class.litcoffee)
+### Container Entities
+* [Model](src/model.litcoffee)
+* [Object](src/object.litcoffee)
+* [Meta](src/meta.litcoffee)
 
-### STORM Properties
-* [STORM Property](src/property.litcoffee)
-* [STORM Array](src/property/array.litcoffee)
-* [STORM Action](src/property/action.litcoffee)
-* [STORM Relationship](src/property/relationship.litcoffee)
-* [STORM BelongsTo (one-to-one)](src/property/belongsTo.litcoffee)
-* [STORM HasMany (one-to-many)](src/property/hasMany.litcoffee) 
+### Property Entities
+* [Property](src/property.litcoffee)
+* [Array](src/property/array.litcoffee)
+* [Action](src/property/action.litcoffee)
+* [Relationship](src/property/relationship.litcoffee)
+* [BelongsTo (one-to-one)](src/property/belongsTo.litcoffee)
+* [HasMany (one-to-many)](src/property/hasMany.litcoffee) 
 
 ## License
   [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/data-storm.svg
-[npm-url]: https://npmjs.org/package/data-storm
-[downloads-image]: https://img.shields.io/npm/dm/data-storm.svg
-[downloads-url]: https://npmjs.org/package/data-storm
+[npm-image]: https://img.shields.io/npm/v/data-synth.svg
+[npm-url]: https://npmjs.org/package/data-synth
+[downloads-image]: https://img.shields.io/npm/dm/data-synth.svg
+[downloads-url]: https://npmjs.org/package/data-synth

@@ -43,13 +43,13 @@ Array::pushRecord = (record) ->
     return null if typeof record isnt "object"
     @push record unless @contains(id:record.id)
 
-class StormClass extends (require './meta')
-  @set storm: 'class'
-  @toJSON: (type='storm', tag=true) ->
+class SynthClass extends (require './meta')
+  @set synth: 'class'
+  @toJSON: (type='json', tag=true) ->
     o = {}
     for k, v of this when v not instanceof Function and k isnt '__super__' and k isnt 'meta'
       o[k] = v
-    for k, v of this.prototype when k isnt 'constructor' and v.meta?.storm?
+    for k, v of this.prototype when k isnt 'constructor' and v.meta?.synth?
       continue unless (v.get type)?
       prefix = (v.get type) + ':'
       o[prefix+k] = v.toJSON? type, false
@@ -61,4 +61,4 @@ class StormClass extends (require './meta')
       t
     else o
 
-module.exports = StormClass
+module.exports = SynthClass
