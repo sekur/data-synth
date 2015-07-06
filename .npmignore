@@ -1,2 +1,3 @@
 .git*
 src
+node_modules
