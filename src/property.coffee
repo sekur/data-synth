@@ -1,9 +1,53 @@
 assert = require 'assert'
 
+Array::equals = (x) -> @length is x.length and @every (e, i) -> e is x[i]
+
+Array::unique = ->
+   return @ unless @length > 0
+   output = {}
+   for key in [0..@length-1]
+     val = @[key]
+     switch
+         when typeof val is 'object' and val.id?
+             output[val.id] = val
+         else
+             output[val] = val
+   #output[@[key]] = @[key] for key in [0...@length]
+   value for key, value of output
+
+Array::contains = (query) ->
+   return false if typeof query isnt "object"
+   hit = Object.keys(query).length
+   @some (item) ->
+       match = 0
+       for key, val of query
+           match += 1 if item[key] is val
+       if match is hit then true else false
+
+Array::where = (query) ->
+   return [] if typeof query isnt "object"
+   hit = Object.keys(query).length
+   @filter (item) ->
+       match = 0
+       for key, val of query
+           match += 1 if item[key] is val
+       if match is hit then true else false
+
+Array::without = (query) ->
+   return @ if typeof query isnt "object"
+   @filter (item) ->
+       for key,val of query
+           return true unless item[key] is val
+       false # item matched all query params
+
+Array::pushRecord = (record) ->
+   return null if typeof record isnt "object"
+   @push record unless @contains(id:record.id)
+
 class SynthProperty extends (require './meta')
-  @set synth: 'property', required: false, unique: false
+  @set synth: 'property', required: false, unique: false, private: false
   @set options: [
-    'type', 'required', 'unique', 'defaultValue', 'normalizer', 'validator', 'serializer'
+    'type', 'required', 'unique', 'private', 'defaultValue', 'normalizer', 'validator', 'serializer'
   ]
 
   constructor: (value, @obj) ->
@@ -14,13 +58,15 @@ class SynthProperty extends (require './meta')
         
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
+
+    # trigger a set operation on construction
     @set value
 
   set: (value) ->
     value ?= switch
       when typeof @opts.defaultValue is 'function' then @opts.defaultValue.call @obj
       else @opts.defaultValue
-    cval = @get()
+    cval = @value
     nval = @normalize value
 
     assert (@validate nval) is true,
@@ -28,11 +74,10 @@ class SynthProperty extends (require './meta')
 
     @isDirty = switch
       when not cval? and nval? then true
-      when @opts.type is 'array' then not cval.equals nval
+      when @opts.type is 'array' then not nval.equals cval
       when cval is nval then false
       else true
-
-    super nval
+    @value = nval
 
   normalize: (value=@get()) ->
     switch

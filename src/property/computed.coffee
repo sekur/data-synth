@@ -18,4 +18,6 @@ class ComputedProperty extends (require '../property')
       @cachedOn = new Date() if @opts.cache > 0
     super
 
+  set: (value) -> super if value?
+
 module.exports = ComputedProperty

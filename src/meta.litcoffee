@@ -28,6 +28,37 @@
         last.r[last.k] = val
         obj
 
+## class object operators (on this)
+
+      @extend: (input) ->
+        output = class extends this
+        switch
+          when not input? then output
+          when (Meta.instanceof input) then output.merge input
+          when input instanceof Function then output.configure input
+          else output.include input
+
+      @configure: (f) -> f?.call? this; this
+
+      # XXX - should deprecate...
+      @include: (obj) ->
+        @::[k] = v for k, v of obj when k isnt 'constructor' and k not in Object.keys Meta.prototype
+        this
+
+The `mixin` convenience function essentially fuses the target class
+obj(s) into itself.
+
+      @mixin: (objs...) ->
+        for obj in objs when obj instanceof Object
+          @[k] = v for k, v of obj when k isnt '__super__' and k not in Object.keys Meta
+          @include obj.prototype
+          continue unless Meta.instanceof obj
+          # when mixing in another Meta object, merge the 'bindings'
+          # as well
+          @merge obj.extract 'bindings'
+        this
+
+
 ## meta data operators (on this.__meta__)
 
 The following `get/extract/match` provide meta data retrieval mechanisms.
@@ -55,6 +86,7 @@ The following `set/merge` provide meta data update mechanisms.
         @__meta__ = Meta.copy (Meta.copy {}, @__meta__), obj
         this
       @merge: (key, obj) ->
+        return this unless key?
         unless typeof key is 'string'
           (@merge k, v) for k, v of (key.__meta__ ? key)
           return this
@@ -68,7 +100,7 @@ The following `set/merge` provide meta data update mechanisms.
           when target instanceof Array and obj instanceof Array
             Array.prototype.push.apply target, obj
           when target instanceof Object and obj instanceof Object
-            target[k] = v for k, v of obj
+            @set "#{key}.#{k}", v for k, v of obj
           else
             assert typeof target is typeof obj,
               "cannot perform 'merge' for #{key} with existing value type conflicting with passed-in value"
@@ -82,29 +114,6 @@ question so that the binding can only take place once for a given key.
         
       @bind: (key, obj) -> unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
         
-## class object operators (on this)
-
-      @configure: (f) -> f?.call? this; this
-      @extend: (obj) ->
-        @[k] = v for k, v of obj when k isnt '__super__' and k not in Object.keys Meta
-        this
-      @include: (obj) ->
-        @::[k] = v for k, v of obj when k isnt 'constructor' and k not in Object.keys Meta.prototype
-        this
-
-The `mixin` convenience function essentially fuses the target class
-obj(s) into itself.
-
-      @mixin: (objs...) ->
-        for obj in objs when obj instanceof Object
-          @extend obj
-          @include obj.prototype
-          continue unless Meta.instanceof obj
-          # when mixing in another Meta object, merge the 'bindings'
-          # as well
-          @merge obj.extract 'bindings'
-        this
-
 ## meta class instance prototypes
 
       constructor: (@value={}) ->

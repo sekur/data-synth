@@ -1,24 +1,21 @@
 # DATA SYNTH module
 
 The DATA SYNTH module is a JS class hierarchy framework that provides
-hierarchical grouping representation of models, objects, and
+hierarchical grouping representation of modules, models, objects, and
 properties for describing relationships and state/config data.
 
-This module is a meta collection of various class objects that
-represent the various data entity constructs.
+    createSynthesizer = ->
+      console.log "should do something..."
 
-    exports = module.exports = require './module'
+    exports = module.exports = createSynthesizer
 
-Container-based Data Entities
+Container Data Entities
 
-    #exports.View = require './view'
-    exports.Controller   = require './controller'
+    exports.Module       = require './module'
     exports.Model        = require './model'
     exports.Object       = require './object'
-    exports.Registry     = require './registry'
-    exports.Meta         = require './meta'
 
-Property-based Data Entities
+Property Data Entities
     
     exports.Property     = require './property'
     exports.Array        = require './property'
@@ -27,3 +24,11 @@ Property-based Data Entities
     exports.Relationship = require './property/relationship'
     exports.BelongsTo    = require './property/belongsTo'
     exports.HasMany      = require './property/hasMany'
+
+Other Data Entities
+
+    #exports.Store
+    #exports.View
+    exports.Controller   = require './controller'
+    exports.Registry     = require './registry'
+    exports.Meta         = require './meta'

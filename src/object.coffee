@@ -17,6 +17,13 @@ class SynthObject extends (require './meta')
       @constructor.bind key, val
     super data
 
+  get: (key) ->
+    return super if key?
+    # deal with 'private' properties and exclude on general get()
+    o = {}
+    o[k] = v.get() for k, v of @properties when not v?.opts.private
+    o
+
   keys: -> Object.keys @properties
 
   addProperty: (key, property) ->

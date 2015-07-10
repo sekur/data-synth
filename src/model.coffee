@@ -44,40 +44,30 @@ class SynthModel extends (require './object')
 
   @belongsTo = (model, opts) ->
     class extends (require './property/belongsTo')
-      @set type: model, opts: opts
+      @set model: model
+      @merge opts
 
   @hasMany = (model, opts) ->
     class extends (require './property/hasMany')
-      @set type: model, opts: opts
+      @set model: model
+      @merge opts
 
   @action = (func, opts) ->
     class extends (require './property/action')
-      @set func: func, opts: opts
+      @set func: func
+      @merge opts
 
-  # internal tracking of bound model records
-  @_bindings: @hasMany SynthModel, private: true
+  # SCHEMA
 
-  # this is a PRIVATE shared prototype singleton ModelRegistry
-  # instance visible across ALL model instances (intentionally
-  # undocumented)
-  #
-  # It is publicly accessible via the DataSynth class
-  #_models: new ModelRegistry
+  # internal tracking of bound model records (those that should be
+  # destroyed when this record is destroyed)
+  @bindings: @hasMany SynthModel, private: true
 
-  constructor: ->
-    super
-    @_models.register @constructor
-    @_models.add this
-
-  get: ->
-      @set 'accessedOn', new Date
-      super
-
-  fetch: (id) -> @_models.find @constructor.meta.name, id
+  RelationshipProperty = (require './property/relationship')
 
   getRelationships: (kind) ->
       @everyProperty (key) -> this if this instanceof RelationshipProperty
-      .filter (x) -> x? and (not kind? or kind is x.kind)
+      .filter (x) -> x? and (not kind? or kind is (x.constructor.get 'kind'))
 
   ###*
   # `bind` subjugates passed in records to be bound to the lifespan of
@@ -89,7 +79,7 @@ class SynthModel extends (require './object')
   bind: (records...) ->
     for record in records
       continue unless record? and record instanceof SynthModel
-      (@getProperty '_bindings').push record.save()
+      (@getProperty 'bindings').push record.save()
 
   match: (query) ->
       for k, v of query
