@@ -1,6 +1,6 @@
 {
   "name": "data-synth",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Dynamic data model synthesizer",
   "author": "Peter K Lee <peter@corenova.com>",
   "homepage": "https://github.com/saintkepha/data-synth",
@@ -19,7 +19,6 @@
   "license": "MIT",
   "main": "lib/data-synth.js",
   "dependencies": {
-		"meta-class": ">=0.1.7",
     "node-uuid": "1.4.1",
     "promise": "^6.0.1"
   },
