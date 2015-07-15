@@ -70,6 +70,7 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
         root = root?[key] while (key = composite.shift())
         root
       @extract: (keys...) ->
+        return Meta.copy {}, @__meta__ unless keys.length > 0
         res = {}
         Meta.copy res, Meta.objectify key, @get key for key in keys
         res
@@ -166,6 +167,7 @@ question so that the binding can only take place once for a given key.
               @set k, v for k, v of key
         else
           key ?= {}
+          @value ?= {}
           Meta.copy @value, (Meta.objectify key, val)
         this
 
