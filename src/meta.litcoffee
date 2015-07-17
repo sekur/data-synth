@@ -80,6 +80,27 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
         obj[k] = v for k, v of root when (k.match regex)
         obj
 
+The following `clear/delete` provides meta data removal mechanisms
+
+      unwindObject = (obj, key) ->
+        [ pre..., key ] = ((key?.split? '.').filter (e) -> !!e) ? []
+        return unless obj? and key?
+        obj = obj[k] while k = pre.shift() when obj instanceof Object
+        return root: obj, key: key if obj?
+
+      @clear: (key) ->
+        o = unwindObject (@__meta__ ? this), key
+        return unless o?
+        val = o.root[o.key]
+        o.root[o.key] = switch
+          when val instanceof Array  then []
+          when val instanceof Object then {}
+          else undefined
+
+      @delete: (key) ->
+        o = unwindObject (@__meta__ ? this), key
+        delete o.root[o.key] if o?
+
 The following `set/merge` provide meta data update mechanisms.
         
       @set: (key, val) ->
@@ -113,18 +134,24 @@ class so that when this class object is instantiated, all the bound
 objects are actualized during construction.  It protects the key under
 question so that the binding can only take place once for a given key.
         
-      @bind: (key, obj) -> unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
+      @bind:   (key, obj) ->
+        unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
+        this
+      @unbind: (keys...)  ->
+        unless keys.length > 0 then @clear 'bindings'
+        else @delete "bindings.#{key}" for key in keys when typeof key is 'string'
+        this
         
 ## meta class instance prototypes
 
-      constructor: (@value={}) ->
-        assert @value instanceof Object, "invalid input value for meta class construction"
-        (@attach k, v) for k, v of (@constructor.get 'bindings')
+      constructor: (value, @container) ->
+        @attach k, v for k, v of (@constructor.get? 'bindings')
+        @set value
 
       attach: (key, val) -> switch
         when (Meta.instanceof val)
           @properties ?= {}
-          @properties[key] = new val @value[key], this
+          @properties[key] = new val undefined, this
           @isContainer = true
         when val instanceof Function
           @methods ?= {}
@@ -136,7 +163,7 @@ question so that the binding can only take place once for a given key.
           @statics[key] = val        
 
       fork: (f) -> f?.call? (new @constructor @get())
-      extract: @extract
+      #extract: @extract
 
       getProperty: (key) ->
         return @properties[key]
@@ -152,23 +179,17 @@ question so that the binding can only take place once for a given key.
         [ key, rest... ] = ((key?.split? '.')?.filter (e) -> !!e) ? []
         switch
           when @isContainer and key? then (@getProperty key)?.get (rest.join '.')
-          when @isContainer then @value[k] = v.get() for k, v of @properties; @value
+          when @isContainer then @value = {}; @value[k] = v.get() for k, v of @properties; @value
           when key? then rest.unshift key; Meta.get.call @value, rest.join '.'
           else @value
             
       set: (key, val) ->
-        key = val unless !!key
-        if @isContainer
-          switch
-            when typeof key is 'string'
-              [ key, rest... ] = ((key?.split? '.')?.filter (e) -> !!e) ? []
-              (@getProperty key)?.set (rest.join '.'), val
-            when key instanceof Object
-              @set k, v for k, v of key
+        if typeof key is 'string' and val?
+          key = Meta.objectify key, val
+        if @isContainer and key instanceof Object
+          (@getProperty k)?.set v for k, v of key
         else
-          key ?= {}
-          @value ?= {}
-          Meta.copy @value, (Meta.objectify key, val)
+          @value = key
         this
 
       invoke: (name, args...) ->

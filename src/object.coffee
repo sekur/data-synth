@@ -12,10 +12,10 @@ class SynthObject extends (require './meta')
       @set func: func
       @merge opts
 
-  constructor: (data, @container) ->
+  constructor: ->
     for key, val of @constructor when key isnt 'constructor' and @constructor.instanceof val
       @constructor.bind key, val
-    super data
+    super
 
   get: (key) ->
     return super if key?

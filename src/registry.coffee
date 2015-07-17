@@ -60,7 +60,7 @@ EventEmitter = require('events').EventEmitter
 # remove()
 ###
 class SynthRegistry extends (require './object')
-  @set storm: 'registry'
+  @set synth: 'registry'
   @include EventEmitter
 
   @Property = RegistryProperty

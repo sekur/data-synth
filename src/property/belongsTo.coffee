@@ -13,7 +13,7 @@ class BelongsToProperty extends (require './relationship')
       when value instanceof Array then undefined
       when value instanceof Object
         record = new @model value
-        @obj.bind record
+        @container.bind record
         @normalize record
       else undefined
 

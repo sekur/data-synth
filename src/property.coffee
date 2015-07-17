@@ -44,27 +44,25 @@ Array::pushRecord = (record) ->
    return null if typeof record isnt "object"
    @push record unless @contains(id:record.id)
 
+
 class SynthProperty extends (require './meta')
   @set synth: 'property', required: false, unique: false, private: false
   @set options: [
     'type', 'required', 'unique', 'private', 'defaultValue', 'normalizer', 'validator', 'serializer'
   ]
 
-  constructor: (value, @obj) ->
-    super
-    
-    assert @obj instanceof (require './object'),
-        "cannot instantiate a new property without containing object reference"
-        
+  constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
-
-    # trigger a set operation on construction
-    @set value
+    
+    super
+    
+    assert @container instanceof (require './object'),
+        "cannot instantiate a new property without containing object reference"
 
   set: (value) ->
     value ?= switch
-      when typeof @opts.defaultValue is 'function' then @opts.defaultValue.call @obj
+      when typeof @opts.defaultValue is 'function' then @opts.defaultValue.call @container
       else @opts.defaultValue
     cval = @value
     nval = @normalize value
@@ -79,10 +77,10 @@ class SynthProperty extends (require './meta')
       else true
     @value = nval
 
-  normalize: (value=@get()) ->
+  normalize: (value) ->
     switch
       when @opts.normalizer instanceof Function
-        @opts.normalizer.call @obj, value
+        @opts.normalizer.call @container, value
       when @opts.type is 'date' and typeof value is 'string'
         new Date value
       when @opts.type is 'array'
@@ -94,10 +92,10 @@ class SynthProperty extends (require './meta')
       else
         value
 
-  validate: (value=@get()) ->
+  validate: (value) ->
     switch
       when @opts.validator instanceof Function
-        @opts.validator.call @obj, value
+        @opts.validator.call @container, value
       when not value?
         @opts.required is false
       else switch @opts.type
@@ -113,7 +111,7 @@ class SynthProperty extends (require './meta')
   serialize: (value=@get(), opts={}) ->
     opts.format ?= 'json'
     if @opts.serializer instanceof Function
-      @opts.serializer.call @obj, value, opts
+      @opts.serializer.call @container, value, opts
     else
       value
 

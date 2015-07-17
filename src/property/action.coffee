@@ -3,9 +3,8 @@ assert = require 'assert'
 # XXX - need to fix this class
 
 class ActionProperty extends (require '../property')
-  @set storm: 'action'
+  @set synth: 'action'
   @merge options: [ 'exec' ]
-
 
   exec: -> throw new Error "undefined action"
 

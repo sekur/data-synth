@@ -18,8 +18,7 @@ Container Data Entities
 Property Data Entities
     
     exports.Property     = require './property'
-    exports.Array        = require './property'
-    exports.Action       = require './property/action'
+    exports.List         = require './property/list'
     exports.Computed     = require './property/computed'
     exports.Relationship = require './property/relationship'
     exports.BelongsTo    = require './property/belongsTo'
@@ -29,6 +28,7 @@ Other Data Entities
 
     #exports.Store
     #exports.View
+    #exports.Action       = require './property/action'
     exports.Controller   = require './controller'
     exports.Registry     = require './registry'
     exports.Meta         = require './meta'
