@@ -7,7 +7,7 @@
 ## general utility helper functions
 
       assert = require 'assert'
-      @instanceof: (obj) ->  obj?.instanceof is arguments.callee
+      @instanceof: (obj) ->  obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__'
       @copy: (dest, src) ->
         for p of src
           if src[p]?.constructor is Object
@@ -30,17 +30,12 @@
 
 ## class object operators (on this)
 
-      @extend: (input) ->
-        output = class extends this
-        switch
-          when not input? then output
-          when (Meta.instanceof input) then output.merge input
-          when input instanceof Function then output.configure input
-          else output.include input
+      @configure: (f, args...) -> f?.apply? this, args; this
 
-      @configure: (f) -> f?.call? this; this
+      @extend: (obj) ->
+        @[k] = v for k, v of obj when k isnt '__super__' and k not in Object.keys Meta
+        this
 
-      # XXX - should deprecate...
       @include: (obj) ->
         @::[k] = v for k, v of obj when k isnt 'constructor' and k not in Object.keys Meta.prototype
         this
@@ -50,7 +45,7 @@ obj(s) into itself.
 
       @mixin: (objs...) ->
         for obj in objs when obj instanceof Object
-          @[k] = v for k, v of obj when k isnt '__super__' and k not in Object.keys Meta
+          @extend obj
           @include obj.prototype
           continue unless Meta.instanceof obj
           # when mixing in another Meta object, merge the 'bindings'
@@ -145,6 +140,8 @@ question so that the binding can only take place once for a given key.
 ## meta class instance prototypes
 
       constructor: (value, @container) ->
+        return class extends Meta if @constructor is Object
+
         @attach k, v for k, v of (@constructor.get? 'bindings')
         @set value
 
