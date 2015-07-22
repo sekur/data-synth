@@ -5,22 +5,23 @@ hierarchical grouping representation of modules, models, objects, and
 properties for describing relationships and state/config data.
 
     class Synth extends (require './meta')
-      @instantiate: (constructor) ->
-        @constructor is constructor or @constructor.__super__?.constructor is constructor
 
       constructor: (source, hook) ->
         # construction via ()
         unless Synth.instanceof @constructor
-          unless source.constructor is arguments.callee or source.__super__?.constructor is arguments.callee
-            #console.log "enabling Synth on #{source.name}"
-            return (input) ->
+          unless (source.constructor is arguments.callee or source.__super__?.constructor is arguments.callee)
+            res = (input) ->
               class extends source
+                @name: source.name
                 @merge input
                 @configure hook
-
-          return class extends source
-            @configure hook
-
+          else
+            res = class extends source
+                @name: source.name
+                @configure hook
+          return res
+          
+        # construction via new
         super
 
     exports = module.exports = Synth
