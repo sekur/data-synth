@@ -1,4 +1,3 @@
-
 class SynthObject extends (require './meta')
   @set synth: 'object'
 

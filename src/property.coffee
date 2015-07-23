@@ -1,5 +1,3 @@
-assert = require 'assert'
-
 Array::equals = (x) -> @length is x.length and @every (e, i) -> e is x[i]
 
 Array::unique = ->
@@ -56,8 +54,8 @@ class SynthProperty extends (require './meta')
     @isDirty = false
     
     super
-    
-    assert @container instanceof (require './object'),
+
+    console.assert @container?,
         "cannot instantiate a new property without containing object reference"
 
   set: (value) ->
@@ -67,7 +65,7 @@ class SynthProperty extends (require './meta')
     cval = @value
     nval = @normalize value
 
-    assert (@validate nval) is true,
+    console.assert (@validate nval) is true,
       "unable to validate passed in (#{value}) as (#{nval}) for setting on this property"
 
     @isDirty = switch

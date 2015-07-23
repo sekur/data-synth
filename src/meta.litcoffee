@@ -6,7 +6,8 @@
 
 ## general utility helper functions
 
-      assert = require 'assert'
+      tokenize = (key) -> ((key?.split? '.')?.filter (e) -> !!e) ? []
+
       @instanceof: (obj) ->  obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__'
       @copy: (dest, src) ->
         for p of src
@@ -17,7 +18,7 @@
         return dest
       @objectify: (key, val) ->
         return key if key instanceof Object
-        composite = ((key?.split '.').filter (e) -> !!e) ? []
+        composite = tokenize key
         unless composite.length
           return val ? {}
           
@@ -61,7 +62,7 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
       @get: (key) ->
         return unless key? and typeof key is 'string'
         root = @__meta__ ? this
-        composite = (key?.split '.').filter (e) -> !!e
+        composite = tokenize key
         root = root?[key] while (key = composite.shift())
         root
       @extract: (keys...) ->
@@ -78,7 +79,7 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
 The following `clear/delete` provides meta data removal mechanisms
 
       unwindObject = (obj, key) ->
-        [ pre..., key ] = ((key?.split? '.').filter (e) -> !!e) ? []
+        [ pre..., key ] = tokenize key
         return unless obj? and key?
         obj = obj[k] while k = pre.shift() when obj instanceof Object
         return root: obj, key: key if obj?
@@ -119,7 +120,7 @@ The following `set/merge` provide meta data update mechanisms.
           when target instanceof Object and obj instanceof Object
             @set "#{key}.#{k}", v for k, v of obj
           else
-            assert typeof target is typeof obj,
+            console.assert typeof target is typeof obj,
               "cannot perform 'merge' for #{key} with existing value type conflicting with passed-in value"
             @set key, obj
         this
@@ -128,13 +129,26 @@ The `bind` function associates the passed in key/object into the meta
 class so that when this class object is instantiated, all the bound
 objects are actualized during construction.  It protects the key under
 question so that the binding can only take place once for a given key.
+Nested bindings are also supported but only if nested keys each
+resolve to a pre-existing instance of Meta class that supports `bind`
+function.
         
-      @bind:   (key, obj) ->
-        unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
+      @bind: (key, obj) ->
+        [ key, rest... ] = tokenize key
+        if rest.length > 0
+          (@get "bindings.#{key}")?.bind? (rest.join '.'), obj
+        else
+          unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
         this
+        
       @unbind: (keys...)  ->
-        unless keys.length > 0 then @clear 'bindings'
-        else @delete "bindings.#{key}" for key in keys when typeof key is 'string'
+        unless keys.length > 0 then @clear 'bindings'; return this
+        for key in keys when typeof key is 'string'
+          [ key, rest... ] = tokenize key
+          if rest.length > 0
+            (@get "bindings.#{key}")?.unbind? (rest.join '.')
+          else
+            @delete "bindings.#{key}" 
         this
         
 ## meta class instance prototypes
@@ -154,28 +168,27 @@ question so that the binding can only take place once for a given key.
           @methods ?= {}
           @methods[key] = val
         when val?.constructor is Object
-          (@attach k, v) for k,v of val
+          (@attach "#{key}:#{k}", v) for k,v of val
         else
           @statics ?= {}
           @statics[key] = val        
 
       fork: (f) -> f?.call? (new @constructor @get())
-      #extract: @extract
 
-      getProperty: (key) ->
-        return @properties[key]
-        
-        [ key, rest... ] = ((key?.split? '.')?.filter (e) -> !!e) ? []
+      meta: (key) -> @constructor.get key
+
+      access: (key) ->
+        [ key, rest... ] = tokenize key
         return unless key? and typeof key is 'string'
-        prop = @properties[key]
+        prop = @properties?[key]
         switch
           when rest.length is 0 then prop
-          else prop?.getProperty? (rest.join '.')
+          else prop?.access? (rest.join '.')
 
       get: (key) ->
-        [ key, rest... ] = ((key?.split? '.')?.filter (e) -> !!e) ? []
+        [ key, rest... ] = tokenize key
         switch
-          when @isContainer and key? then (@getProperty key)?.get (rest.join '.')
+          when @isContainer and key? then (@access key)?.get (rest.join '.')
           when @isContainer then @value = {}; @value[k] = v.get() for k, v of @properties; @value
           when key? then rest.unshift key; Meta.get.call @value, rest.join '.'
           else @value
@@ -184,14 +197,14 @@ question so that the binding can only take place once for a given key.
         if typeof key is 'string' and val?
           key = Meta.objectify key, val
         if @isContainer and key instanceof Object
-          (@getProperty k)?.set v for k, v of key
+          (@access k)?.set v for k, v of key
         else
           @value = key
         this
 
       invoke: (name, args...) ->
         method = @methods?[name]
-        assert method instanceof Function,
+        console.assert method instanceof Function,
           "cannot invoke undefined '#{name}' method"
         method.apply this, args        
         
