@@ -1,5 +1,9 @@
-class SynthObject extends (require './meta')
-  @set synth: 'object'
+Meta = require './meta'
+
+class SynthObject extends Meta
+  @set synth: 'object', __schema__: {}, default: {}
+
+  @schema = (obj) -> @merge '__schema__', obj
 
   @attr = (type, opts) ->
     class extends (require './property')
@@ -12,19 +16,21 @@ class SynthObject extends (require './meta')
       @merge opts
 
   constructor: ->
-    for key, val of @constructor when key isnt 'constructor' and @constructor.instanceof val
-      @constructor.bind key, val
+    @constructor.bind k, v for k, v of (@constructor.get '__schema__')
     super
 
-  get: (key) ->
-    return super if key?
-    # deal with 'private' properties and exclude on general get()
-    o = {}
-    o[k] = v.get() for k, v of @properties when not v?.opts.private
-    o
+  get: (keys...) ->
+    keys = keys.filter (e) -> !!e
+    switch keys.length
+      when 1 then return super keys[0]
+      when 0 then keys.push k for k, v of @properties when not v.opts?.private
+    return unless keys.length
+    return keys
+      .map (key) => Meta.objectify key, super key
+      .reduce ((a, b) -> Meta.copy a, b), {}
 
-  keys: -> Object.keys @properties
-
+  set: -> super; @value ?= {}
+        
   addProperty: (key, property) ->
     if not (@hasProperty key) and property instanceof Meta
       @properties[key] = property
@@ -35,15 +41,19 @@ class SynthObject extends (require './meta')
 
   validate: -> (@everyProperty (key) -> name: key, isValid: @validate()).filter (e) -> e.isValid is false
 
-  serialize: (format='json') ->
-    o = switch format
-      when 'json' then {}
-      else ''
+  serialize: (opts={}) ->
+    opts.format ?= 'json'
+    o = switch opts.format
+      when 'xml' then ''
+      else {}
     @everyProperty (key) ->
-      switch format
-        when 'json' then o[key] = @serialize format
-        when 'xml' then o += "<#{key}>" + (@serialize format) + "</#{key}>"
-    o
+      return if @opts?.private
+      unless @serialize instanceof Function
+        console.warn "#{key} does not have serialize function"
+      switch opts.format
+        when 'json' then o[key] = @serialize? opts
+        when 'xml'  then o += "<#{key}>" + (@serialize? opts) + "</#{key}>"
+    return o
 
   clearDirty: -> @everyProperty -> @isDirty = false
   dirtyProperties: (keys) -> (@everyProperty (key) -> @isDirty ? key).filter (x) ->

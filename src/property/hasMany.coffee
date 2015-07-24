@@ -1,7 +1,7 @@
 BelongsToProperty = require './belongsTo'
 
 class HasManyProperty extends (require './relationship')
-  @set kind: 'hasMany', unique: true, defaultValue: []
+  @set kind: 'hasMany', unique: true, default: []
 
   get: -> (super.map (e) => @model::fetch e).filter (e) -> e?
 
@@ -19,7 +19,8 @@ class HasManyProperty extends (require './relationship')
         (value.filter (e) -> e?).map (e) => BelongsToProperty::normalize.call this, e
       else undefined
 
-  serialize: (value=@get(), opts={}) ->
+  serialize: (opts={}) ->
+    value=@get()
     if @opts.embedded is true
       value.map (e) -> e.serialize opts
     else

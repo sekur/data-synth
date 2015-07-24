@@ -4,8 +4,7 @@ The DATA SYNTH module is a JS class hierarchy framework that provides
 hierarchical grouping representation of modules, models, objects, and
 properties for describing relationships and state/config data.
 
-    class Synth extends (require './meta')
-
+    class Synth extends (require './store')
       constructor: (source, hook) ->
         # construction via ()
         unless Synth.instanceof @constructor
@@ -25,7 +24,7 @@ properties for describing relationships and state/config data.
                 @name: source.name
                 @configure hook
           return res
-          
+
         # construction via new
         super
 
@@ -33,22 +32,21 @@ properties for describing relationships and state/config data.
 
 Container Data Entities
 
-    exports.Module       = Synth (require './module')
+    exports.Store        = Synth (require './store')
     exports.Model        = Synth (require './model')
     exports.Object       = Synth (require './object')
 
 Property Data Entities
     
     exports.Property     = Synth (require './property')
-    exports.List         = Synth (require './property/list')
     exports.Computed     = Synth (require './property/computed')
+    exports.List         = Synth (require './property/list')
     exports.Relationship = Synth (require './property/relationship')
     exports.BelongsTo    = Synth (require './property/belongsTo')
     exports.HasMany      = Synth (require './property/hasMany')
 
 Other Data Entities
 
-    #exports.Store
     #exports.View
     #exports.Action       = require './property/action'
     exports.Interface    = Synth (require './interface')

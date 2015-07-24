@@ -19,7 +19,8 @@ class BelongsToProperty extends (require './relationship')
 
   validate:  (value=@get()) -> (super value) is true and (not value? or @model::fetch value instanceof @model)
 
-  serialize: (value=@get(), opts={}) ->
+  serialize: (opts={}) ->
+    value=@get()
     if @opts.embedded is true
       value?.serialize? opts
     else

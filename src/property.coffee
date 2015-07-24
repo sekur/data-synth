@@ -44,9 +44,9 @@ Array::pushRecord = (record) ->
 
 
 class SynthProperty extends (require './meta')
-  @set synth: 'property', required: false, unique: false, private: false
+  @set synth: 'property', config: true, required: false, unique: false, private: false
   @set options: [
-    'type', 'required', 'unique', 'private', 'defaultValue', 'normalizer', 'validator', 'serializer'
+    'type', 'units', 'required', 'unique', 'private', 'config', 'default', 'normalizer', 'validator', 'serializer'
   ]
 
   constructor: ->
@@ -60,13 +60,13 @@ class SynthProperty extends (require './meta')
 
   set: (value) ->
     value ?= switch
-      when typeof @opts.defaultValue is 'function' then @opts.defaultValue.call @container
-      else @opts.defaultValue
+      when typeof @opts.default is 'function' then @opts.default.call @container
+      else @opts.default
     cval = @value
     nval = @normalize value
 
-    console.assert (@validate nval) is true,
-      "unable to validate passed in (#{value}) as (#{nval}) for setting on this property"
+    console.assert @isConstructing or (@validate nval) is true,
+      "unable to validate passed in '#{value} -> #{nval}' for setting on this property"
 
     @isDirty = switch
       when not cval? and nval? then true
@@ -106,7 +106,8 @@ class SynthProperty extends (require './meta')
         else
           true
 
-  serialize: (value=@get(), opts={}) ->
+  serialize: (opts={}) ->
+    value=@get()
     opts.format ?= 'json'
     if @opts.serializer instanceof Function
       @opts.serializer.call @container, value, opts

@@ -10,9 +10,9 @@ The `SynthApplication` represents the runtime app
       @set synth: 'application'  #, registry: new ModelRegistry
 
       # default properties schema
-      #logfile:   @attr 'string', defaultValue: @computed -> "/tmp/#{@constructor.name}-#{@get('id')}.log"
-      @loglevel: @attr 'string', defaultValue: 'info'
-      @datadir:  @attr 'string', defaultValue: '/tmp'
+      #logfile:   @attr 'string', default: @computed -> "/tmp/#{@constructor.name}-#{@get('id')}.log"
+      @loglevel: @attr 'string', default: 'info'
+      @datadir:  @attr 'string', default: '/tmp'
 
       # Application can have collection of other modules
       @modules: @hasMany SynthModule, private: true

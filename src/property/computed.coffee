@@ -1,5 +1,3 @@
-assert = require 'assert'
-
 class ComputedProperty extends (require '../property')
   @set synth: 'computed', cache: 0
   @merge options: [ 'cache', 'func' ]
@@ -7,7 +5,7 @@ class ComputedProperty extends (require '../property')
   constructor: ->
     super
 
-    assert @opts.func instanceof Function,
+    console.assert @opts.func instanceof Function,
       "cannot instantiate a new ComputedProperty without a function"
     @cachedOn = new Date() if @opts.cache > 0
 

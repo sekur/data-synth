@@ -9,10 +9,14 @@
       tokenize = (key) -> ((key?.split? '.')?.filter (e) -> !!e) ? []
 
       @instanceof: (obj) ->  obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__'
-      @copy: (dest, src) ->
+      @copy: (dest={}, src) ->
         for p of src
           if src[p]?.constructor is Object
             dest[p] ?= {}
+            unless dest[p].constructor is Object
+              k = dest[p]
+              dest[p] = {}
+              dest[p][k] = undefined
             arguments.callee dest[p], src[p]
           else dest[p] = src[p]
         return dest
@@ -121,7 +125,7 @@ The following `set/merge` provide meta data update mechanisms.
             @set "#{key}.#{k}", v for k, v of obj
           else
             console.assert typeof target is typeof obj,
-              "cannot perform 'merge' for #{key} with existing value type conflicting with passed-in value"
+              "cannot perform merge for '#{key}' with existing value type (#{typeof target}) conflicting with passed-in value (#{typeof obj})"
             @set key, obj
         this
 
@@ -157,7 +161,9 @@ function.
         return class extends Meta if @constructor is Object
 
         @attach k, v for k, v of (@constructor.get? 'bindings')
+        @isConstructing = true
         @set value
+        delete @isConstructing
 
       attach: (key, val) -> switch
         when (Meta.instanceof val)
@@ -188,7 +194,7 @@ function.
       get: (key) ->
         [ key, rest... ] = tokenize key
         switch
-          when @isContainer and key? then (@access key)?.get (rest.join '.')
+          when @isContainer and key? then (@access key)?.get (if rest.length then (rest.join '.') else undefined)
           when @isContainer then @value = {}; @value[k] = v.get() for k, v of @properties; @value
           when key? then rest.unshift key; Meta.get.call @value, rest.join '.'
           else @value

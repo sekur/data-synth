@@ -13,7 +13,7 @@ class ModelRegistryProperty extends Registry.Property
       else
         super
 
-  serialize: (format='json') ->
+  serialize: (opts={}) ->
     ids: Object.keys(@value)
     numRecords: Object.keys(@value).length
 
@@ -36,7 +36,7 @@ class ModelRegistry extends Registry
     query = (record.get('id') for record in records when record instanceof Model)
     super record.constructor.meta.name, query
 
-  contains: (key) -> (@getProperty key)
+  contains: (key) -> (@access key)
 
 
 class SynthModel extends (require './object')
@@ -57,11 +57,10 @@ class SynthModel extends (require './object')
       @set func: func
       @merge opts
 
-  # SCHEMA
-
-  # internal tracking of bound model records (those that should be
-  # destroyed when this record is destroyed)
-  @bindings: @hasMany SynthModel, private: true
+  @schema
+    # internal tracking of bound model records (those that should be
+    # destroyed when this record is destroyed)
+    children: @hasMany SynthModel, private: true
 
   RelationshipProperty = (require './property/relationship')
 
@@ -76,14 +75,15 @@ class SynthModel extends (require './object')
   # When this current model record is destroyed, all bound dependents
   # will also be destroyed.
   ###
+
   bind: (records...) ->
     for record in records
       continue unless record? and record instanceof SynthModel
-      (@getProperty 'bindings').push record.save()
+      (@access 'children').push record.save()
 
   match: (query) ->
       for k, v of query
-          x = (@getProperty k)?.normalize (@get k)
+          x = (@access k)?.normalize (@get k)
           x = "#{x}" if typeof x is 'boolean' and typeof v is 'string'
           return false unless x is v
       return true
@@ -110,7 +110,7 @@ class SynthModel extends (require './object')
     new Promise (resolve, reject) =>
       try
         unless action instanceof Function
-          action = (@getProperty action)?.exec
+          action = (@access action)?.exec
         resolve (action?.apply this, args)
       catch err
         reject err
