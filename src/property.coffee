@@ -65,8 +65,10 @@ class SynthProperty extends (require './meta')
     cval = @value
     nval = @normalize value
 
+    console.log "setting #{value} normalized to #{nval}"
+
     console.assert @isConstructing or (@validate nval) is true,
-      "unable to validate passed in '#{value} -> #{nval}' for setting on this property"
+      "unable to validate passed in '#{nval}' as '#{@opts.type}' for setting on this property"
 
     @isDirty = switch
       when not cval? and nval? then true

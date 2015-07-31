@@ -140,7 +140,9 @@ function.
       @bind: (key, obj) ->
         [ key, rest... ] = tokenize key
         if rest.length > 0
-          (@get "bindings.#{key}")?.bind? (rest.join '.'), obj
+          res = (@get "bindings.#{key}")?.bind? (rest.join '.'), obj
+          console.assert res?,
+            "unable to bind to non-existent prefix #{key}"
         else
           unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
         this
@@ -154,6 +156,18 @@ function.
           else
             @delete "bindings.#{key}" 
         this
+
+The following `reduce` provides meta data extrapolation by collapsing
+nested `bindings` into object format for singular JS object output
+
+      @reduce: ->
+        o = meta: @extract()
+        for key, val of o.meta.bindings
+          o[key] = switch
+            when (@instanceof val) then val.reduce()
+            else val
+        delete o.meta.bindings
+        return o
         
 ## meta class instance prototypes
 
@@ -176,8 +190,8 @@ function.
         when val?.constructor is Object
           (@attach "#{key}:#{k}", v) for k,v of val
         else
-          @statics ?= {}
-          @statics[key] = val        
+          @properties ?= {}
+          @properties[key] = val
 
       fork: (f) -> f?.call? (new @constructor @get())
 
@@ -187,6 +201,7 @@ function.
         [ key, rest... ] = tokenize key
         return unless key? and typeof key is 'string'
         prop = @properties?[key]
+        return unless prop?
         switch
           when rest.length is 0 then prop
           else prop?.access? (rest.join '.')
@@ -194,8 +209,12 @@ function.
       get: (key) ->
         [ key, rest... ] = tokenize key
         switch
-          when @isContainer and key? then (@access key)?.get (if rest.length then (rest.join '.') else undefined)
-          when @isContainer then @value = {}; @value[k] = v.get() for k, v of @properties; @value
+          when @isContainer and key? then (@access key)?.get? (if rest.length then (rest.join '.') else undefined)
+          when @isContainer
+            @value = {}
+            for k, v of @properties
+              @value[k] = if v.get? then v.get?() else v
+            @value
           when key? then rest.unshift key; Meta.get.call @value, rest.join '.'
           else @value
             

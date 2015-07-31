@@ -6,8 +6,8 @@ properties for describing relationships and state/config data.
 
     class Synth extends (require './store')
       constructor: (source, hook) ->
-        # construction via ()
         unless Synth.instanceof @constructor
+          # construction via ()
           unless (source.constructor is arguments.callee or source.__super__?.constructor is arguments.callee)
             # we layer a new anonymous class with constructor that
             # returns an extension of the 'source' class
@@ -24,8 +24,6 @@ properties for describing relationships and state/config data.
                 @name: source.name
                 @configure hook
           return res
-
-        # construction via new
         super
 
     exports = module.exports = Synth
@@ -47,8 +45,7 @@ Property Data Entities
 
 Other Data Entities
 
-    #exports.View
-    #exports.Action       = require './property/action'
+    exports.Action       = Synth (require './action')
     exports.Interface    = Synth (require './interface')
     exports.Controller   = Synth (require './controller')
     exports.Registry     = Synth (require './registry')

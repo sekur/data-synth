@@ -17,7 +17,8 @@ class ListProperty extends (require '../property')
       else x
 
   validate: (value) ->
+    isClass = @opts.subtype instanceof Function
     super and value.every (x) =>
-      (not @opts.subtype?) or (typeof x is @opts.subtype) or (x instanceof @opts.subtype)
+      (not @opts.subtype?) or (typeof x is @opts.subtype) or (isClass and x instanceof @opts.subtype)
 
 module.exports = ListProperty
