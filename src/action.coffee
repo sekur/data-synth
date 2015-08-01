@@ -26,6 +26,7 @@ class SynthAction extends (require './meta')
         console.log res
         for action in res
           console.log "got back #{action} from listener"
+        return res
 
   trigger: (origin, event=(@meta 'name')) ->
     console.log "emit '#{event}' for handling by listeners"

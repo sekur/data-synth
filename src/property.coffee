@@ -46,7 +46,7 @@ Array::pushRecord = (record) ->
 class SynthProperty extends (require './meta')
   @set synth: 'property', config: true, required: false, unique: false, private: false
   @set options: [
-    'type', 'units', 'required', 'unique', 'private', 'config', 'default', 'normalizer', 'validator', 'serializer'
+    'type', 'units', 'enum', 'required', 'unique', 'private', 'config', 'default', 'normalizer', 'validator', 'serializer'
   ]
 
   constructor: ->
@@ -85,6 +85,10 @@ class SynthProperty extends (require './meta')
         new Date value
       when @opts.type is 'boolean' and typeof value is 'string'
         value is 'true'
+      when @opts.type is 'enumeration' and typeof value is 'number'
+        for key, val of @opts.enum
+          return key if val.value is value or val.value is "#{value}"
+        value
       when @opts.type is 'array'
         unless value instanceof Array
           value = if value? then [ value ] else []
