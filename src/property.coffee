@@ -83,6 +83,8 @@ class SynthProperty extends (require './meta')
         @opts.normalizer.call @container, value
       when @opts.type is 'date' and typeof value is 'string'
         new Date value
+      when @opts.type is 'boolean' and typeof value is 'string'
+        value is 'true'
       when @opts.type is 'array'
         unless value instanceof Array
           value = if value? then [ value ] else []
