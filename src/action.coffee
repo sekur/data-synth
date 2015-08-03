@@ -1,7 +1,11 @@
 Promise = require 'promise'
 
-class SynthAction extends (require './meta')
-  @set synth: 'action', event: undefined
+class SynthAction extends (require './object')
+  @set synth: 'action'
+
+  @schema
+    input:  class extends (require './meta')
+    output: class extends (require './meta')
 
   invoke: (origin, event=(@meta 'name'), container=@container) ->
     listeners = container.listeners event
