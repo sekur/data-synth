@@ -13,7 +13,7 @@ The `SynthStore` represents the primary container construct for managing various
         events: @computed (-> return @events ), type: 'array', private: true
 
       @on = (event, func) ->
-        [ target, action ] = event.key.split ':'
+        [ target, action ] = event.split ':'
         unless action?
           @merge 'events', [ key: target, value: func ]
         else
