@@ -1,14 +1,17 @@
 # meta-class 
 
     class Meta
-      @__meta__: bindings: {}
+      @__meta__: synth: 'meta', bindings: {}
       @__version__: 3
 
 ## general utility helper functions
 
       tokenize = (key) -> ((key?.split? '.')?.filter (e) -> !!e) ? []
 
-      @instanceof: (obj) ->  obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__'
+      @instanceof: (obj) ->
+        (obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__')
+      @synthesized: (obj) ->
+        (@instanceof obj) and (obj.get 'synth') is (@get 'synth')
       @copy: (dest={}, src) ->
         for p of src
           if src[p]?.constructor is Object
