@@ -1,7 +1,7 @@
 # meta-class 
 
     class Meta
-      @__meta__: synth: 'meta', bindings: {}
+      @__meta__: synth: 'meta', bindings: {}, exports: {}
       @__version__: 3
 
 ## general utility helper functions
@@ -58,7 +58,7 @@ obj(s) into itself.
           continue unless Meta.instanceof obj
           # when mixing in another Meta object, merge the 'bindings'
           # as well
-          @merge obj.extract 'bindings'
+          @merge obj.extract 'bindings', 'exports'
         this
 
 
@@ -113,7 +113,7 @@ The following `set/merge` provide meta data update mechanisms.
       @merge: (key, obj) ->
         return this unless key?
         unless typeof key is 'string'
-          (@merge k, v) for k, v of (key.__meta__ ? key)
+          (@merge k, v) for k, v of (key.__meta__ ? key) when k isnt 'synth'
           return this
         target = @get key
         switch
