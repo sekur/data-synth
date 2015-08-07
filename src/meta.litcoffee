@@ -12,7 +12,7 @@
         (obj?.instanceof is arguments.callee or obj?.hasOwnProperty? '__meta__')
       @synthesized: (obj) ->
         (@instanceof obj) and (obj.get 'synth') is (@get 'synth')
-      @copy: (dest={}, src) ->
+      @copy: (dest={}, src, append=false) ->
         for p of src
           switch
             when src[p]?.constructor is Object
@@ -21,14 +21,15 @@
                 k = dest[p]
                 dest[p] = {}
                 dest[p][k] = undefined
-              dest[p].push src[p]
+              arguments.callee dest[p], src[p], append
             when dest[p]?.constructor is Object
               dest[p][src[p]] = undefined
-            when dest[p] isnt src[p]
+            when dest[p] isnt src[p] and append
               k = dest[p]
               dest[p] = {}
               dest[p][k] = undefined
               dest[p][src[p]] = undefined
+            else dest[p] = src[p]
         return dest
       @objectify: (key, val) ->
         return key if key instanceof Object
