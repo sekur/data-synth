@@ -17,17 +17,16 @@
           switch
             when src[p]?.constructor is Object
               dest[p] ?= {}
-              unless dest[p].constructor is Object
+              unless dest[p] instanceof Object
                 k = dest[p]
                 dest[p] = {}
                 dest[p][k] = undefined
               arguments.callee dest[p], src[p], append
-            when dest[p]?.constructor is Object
-              dest[p][src[p]] = undefined
-            when dest[p] isnt src[p] and append
-              k = dest[p]
-              dest[p] = {}
-              dest[p][k] = undefined
+            when append is true and dest[p]?
+              unless dest[p] instanceof Object
+                k = dest[p]
+                dest[p] = {}
+                dest[p][k] = undefined
               dest[p][src[p]] = undefined
             else dest[p] = src[p]
         return dest
