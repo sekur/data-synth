@@ -1,24 +1,5 @@
 # meta-class 
 
-    Object::push = (src) ->
-      for p of src
-        switch
-          when src[p]?.constructor is Object
-            @[p] ?= {}
-            unless @[p].constructor is Object
-              k = @[p]
-              @[p] = {}
-              @[p][k] = undefined
-            @[p].push src[p]
-          when @[p]?.constructor is Object
-            @[p][src[p]] = undefined
-          when @[p] isnt src[p]
-            k = @[p]
-            @[p] = {}
-            @[p][k] = undefined
-            @[p][src[p]] = undefined
-      return this
-    
     class Meta
       @__meta__: synth: 'meta', bindings: {}, exports: {}
       @__version__: 3
@@ -33,14 +14,21 @@
         (@instanceof obj) and (obj.get 'synth') is (@get 'synth')
       @copy: (dest={}, src) ->
         for p of src
-          if src[p]?.constructor is Object
-            dest[p] ?= {}
-            unless dest[p].constructor is Object
+          switch
+            when src[p]?.constructor is Object
+              dest[p] ?= {}
+              unless dest[p].constructor is Object
+                k = dest[p]
+                dest[p] = {}
+                dest[p][k] = undefined
+              dest[p].push src[p]
+            when dest[p]?.constructor is Object
+              dest[p][src[p]] = undefined
+            when dest[p] isnt src[p]
               k = dest[p]
               dest[p] = {}
               dest[p][k] = undefined
-            arguments.callee dest[p], src[p]
-          else dest[p] = src[p]
+              dest[p][src[p]] = undefined
         return dest
       @objectify: (key, val) ->
         return key if key instanceof Object
