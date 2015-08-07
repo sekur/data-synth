@@ -7,15 +7,15 @@ class SynthAction extends (require './object')
     input:  class extends (require './meta')
     output: class extends (require './meta')
 
-  invoke: (origin, event=(@meta 'name'), container=@container) ->
-    listeners = container.listeners event
+  invoke: (origin, event=(@meta 'name'), parent=@parent) ->
+    listeners = parent.listeners event
     console.log "invoking '#{event}' for handling by #{listeners.length} listeners"
     action = this
     promises =
       for listener in listeners
         do (listener) ->
           new Promise (resolve, reject) ->
-            listener.apply container, [
+            listener.apply parent, [
               (action.access 'input')
               (action.access 'output')
               (err) -> if err? then reject err else resolve action
@@ -34,6 +34,6 @@ class SynthAction extends (require './object')
 
   trigger: (origin, event=(@meta 'name')) ->
     console.log "emit '#{event}' for handling by listeners"
-    @container.emit event, (@access 'input'), (@access 'output'), (err) -> 
+    @parent.emit event, (@access 'input'), (@access 'output'), (err) -> 
 
 module.exports = SynthAction

@@ -181,7 +181,7 @@ nested `bindings` into object format for singular JS object output
         
 ## meta class instance prototypes
 
-      constructor: (value, @container) ->
+      constructor: (value, @parent) ->
         return class extends Meta if @constructor is Object
 
         @attach k, v for k, v of (@constructor.get? 'bindings')
@@ -215,6 +215,20 @@ nested `bindings` into object format for singular JS object output
         switch
           when rest.length is 0 then prop
           else prop?.access? (rest.join '.')
+
+      seek: (query, meta=true) ->
+        return unless typeof query is 'object'
+        for k, v of query
+          value = switch
+            when (Meta.instanceof this) then (if meta then @meta k else @get k)
+            else @[k]
+
+          unless (switch
+            when v instanceof Function then (v.call this, value)
+            else value is v)
+            return unless @parent?
+            return arguments.callee.call @parent, query, meta
+        return this
 
       get: (key) ->
         [ key, rest... ] = tokenize key

@@ -55,12 +55,12 @@ class SynthProperty extends (require './meta')
     
     super
 
-    console.assert @container?,
+    console.assert @parent?,
         "cannot instantiate a new property without containing object reference"
 
   set: (value) ->
     value ?= switch
-      when typeof @opts.default is 'function' then @opts.default.call @container
+      when typeof @opts.default is 'function' then @opts.default.call @parent
       else @opts.default
     cval = @value
     nval = @normalize value
@@ -79,7 +79,7 @@ class SynthProperty extends (require './meta')
   normalize: (value) ->
     switch
       when @opts.normalizer instanceof Function
-        @opts.normalizer.call @container, value
+        @opts.normalizer.call @parent, value
       when @opts.type is 'date' and typeof value is 'string'
         new Date value
       when @opts.type is 'boolean' and typeof value is 'string'
@@ -100,7 +100,7 @@ class SynthProperty extends (require './meta')
   validate: (value) ->
     switch
       when @opts.validator instanceof Function
-        @opts.validator.call @container, value
+        @opts.validator.call @parent, value
       when not value?
         @opts.required is false
       else switch @opts.type
@@ -117,7 +117,7 @@ class SynthProperty extends (require './meta')
     value=@get()
     opts.format ?= 'json'
     if @opts.serializer instanceof Function
-      @opts.serializer.call @container, value, opts
+      @opts.serializer.call @parent, value, opts
     else
       value
 
