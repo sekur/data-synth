@@ -220,9 +220,8 @@ nested `bindings` into object format for singular JS object output
         return unless typeof query is 'object'
         for k, v of query
           value = switch
-            when (Meta.instanceof this) then (if meta then @meta k else @get k)
+            when (this instanceof Meta) then (if meta then @meta k else @get k)
             else @[k]
-
           unless (switch
             when v instanceof Function then (v.call this, value)
             else value is v)
