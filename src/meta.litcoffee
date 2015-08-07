@@ -1,5 +1,24 @@
 # meta-class 
 
+    Object::push = (src) ->
+      for p of src
+        switch
+          when src[p]?.constructor is Object
+            @[p] ?= {}
+            unless @[p].constructor is Object
+              k = @[p]
+              @[p] = {}
+              @[p][k] = undefined
+            @[p].push src[p]
+          when @[p]?.constructor is Object
+            @[p][src[p]] = undefined
+          when @[p] isnt src[p]
+            k = @[p]
+            @[p] = {}
+            @[p][k] = undefined
+            @[p][src[p]] = undefined
+      return this
+    
     class Meta
       @__meta__: synth: 'meta', bindings: {}, exports: {}
       @__version__: 3
