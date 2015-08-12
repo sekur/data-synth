@@ -109,7 +109,10 @@ The following `clear/delete` provides meta data removal mechanisms
 
       @delete: (key) ->
         o = unwindObject (@__meta__ ? this), key
-        delete o.root[o.key] if o?
+        return unless o?
+        orig = o.root[o.key]
+        delete o.root[o.key]
+        return orig
 
 The following `set/merge` provide meta data update mechanisms.
         
@@ -157,15 +160,13 @@ function.
           unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
         this
         
-      @unbind: (keys...)  ->
-        unless keys.length > 0 then @clear 'bindings'; return this
-        for key in keys when typeof key is 'string'
-          [ key, rest... ] = tokenize key
-          if rest.length > 0
-            (@get "bindings.#{key}")?.unbind? (rest.join '.')
-          else
-            @delete "bindings.#{key}" 
-        this
+      @unbind: (key)  ->
+        unless key? then @clear 'bindings'; return this
+        [ key, rest... ] = tokenize key
+        if rest.length > 0
+          (@get "bindings.#{key}")?.unbind? (rest.join '.')
+        else
+          @delete "bindings.#{key}" 
 
 The following `reduce` provides meta data extrapolation by collapsing
 nested `bindings` into object format for singular JS object output

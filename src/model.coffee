@@ -38,7 +38,6 @@ class ModelRegistry extends Registry
 
   contains: (key) -> (@access key)
 
-
 class SynthModel extends (require './object')
   @set synth: 'model'
 
