@@ -1,12 +1,17 @@
 Meta = require './meta'
 
 class SynthObject extends Meta
-  @set synth: 'object', __schema__: {}, default: {}
+  @set synth: 'object', default: {}
 
-  @schema = (obj) -> @merge '__schema__', obj
+  @schema = (obj) -> @bind k, v for k, v of obj
 
   @attr = (type, opts) ->
     class extends (require './property')
+      @set type: type
+      @merge opts
+
+  @list = (type, opts) ->
+    class extends (require './property/list')
       @set type: type
       @merge opts
 
@@ -14,10 +19,6 @@ class SynthObject extends Meta
     class extends (require './property/computed')
       @set func: func
       @merge opts
-
-  constructor: ->
-    @constructor.bind k, v for k, v of (@constructor.get '__schema__')
-    super
 
   get: (keys...) ->
     keys = keys.filter (e) -> !!e

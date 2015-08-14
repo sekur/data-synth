@@ -8,6 +8,11 @@ class ListProperty extends (require '../property')
 
   get: -> super.map (x) -> x.get?() ? x
 
+  push: ->
+    list = @get()
+    Array::push.apply list, arguments
+    @set list
+
   Meta = require '../meta'
   normalize: ->
     super.map (x) => switch

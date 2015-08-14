@@ -5,24 +5,11 @@ The `SynthStore` represents the primary container construct for managing various
     #ModelRegistry = require './registry/model'
 
     class SynthStore extends (require './model')
-      @set synth: 'store', models: [], controllers: [], events: []
+      @set synth: 'store', models: [], controllers: []
       @mixin (require 'events').EventEmitter
 
       @schema
         models: @computed (-> (@constructor.get 'models') ), type: 'array', private: true
-        events: @computed (-> return @events ), type: 'array', private: true
-
-      @on = (event, func) ->
-        [ target, action ] = event.split ':'
-        unless action?
-          @merge 'events', [ key: target, value: func ]
-        else
-          (@get "bindings.#{target}")?.merge 'events', [ key: action, value: func ]
-
-      constructor: ->
-        super
-        @events = (@constructor.get 'events')
-        .map (event) => name: event.key, listener: @on event.key, event.value
 
 The below `register` for DataStore accepts one or more models and adds
 to internal `ModelRegistry` instance.
