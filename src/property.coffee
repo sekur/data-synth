@@ -25,6 +25,7 @@ Array::contains = (query) ->
 Array::where = (query) ->
    return [] if typeof query isnt "object"
    hit = Object.keys(query).length
+   return this unless hit > 0
    @filter (item) ->
        match = 0
        for key, val of query

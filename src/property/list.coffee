@@ -1,12 +1,16 @@
 class ListProperty extends (require '../property')
   @set synth: 'list'
-  @merge options: [ 'subtype' ]
+  @merge options: [ 'subtype', 'key', 'ordered-by' ]
 
   constructor: ->
-    @constructor.set type: 'array', subtype: (@constructor.get 'type')
+    unless (@constructor.get 'type') is 'array'
+      @constructor.set type: 'array', subtype: (@constructor.get 'type')
     super
 
-  get: -> super.map (x) -> x.get?() ? x
+  get: (query={}) ->
+    super
+      .map (x) -> x.get?() ? x
+      .where query
 
   push: ->
     list = @get()
