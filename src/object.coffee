@@ -49,8 +49,8 @@ class SynthObject extends Meta
       else {}
     @everyProperty (key) ->
       return if @opts?.private
-      unless @serialize instanceof Function
-        console.warn "#{key} does not have serialize function"
+      return unless @serialize instanceof Function
+
       switch opts.format
         when 'json' then o[key] = @serialize? opts
         when 'xml'  then o += "<#{key}>" + (@serialize? opts) + "</#{key}>"
