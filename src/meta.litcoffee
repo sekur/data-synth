@@ -166,7 +166,9 @@ function.
         if rest.length > 0
           (@get "bindings.#{key}")?.unbind? (rest.join '.')
         else
-          @delete "bindings.#{key}" 
+          @delete "bindings.#{key}"
+
+      @rebind: (key, func) -> @bind key, func? (@unbind key)
 
 The following `reduce` provides meta data extrapolation by collapsing
 nested `bindings` into object format for singular JS object output
@@ -178,6 +180,7 @@ nested `bindings` into object format for singular JS object output
             when (@instanceof val) then val.reduce()
             else val
         delete o.meta.bindings
+        delete o.meta.exports
         return o
         
 ## meta class instance prototypes
@@ -246,7 +249,7 @@ nested `bindings` into object format for singular JS object output
         if typeof key is 'string' and val?
           key = Meta.objectify key, val
         if @isContainer and key instanceof Object
-          (@access k)?.set v for k, v of key
+          (@access k)?.set? v for k, v of key
         else
           @value = key
         this

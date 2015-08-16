@@ -118,8 +118,13 @@ class SynthProperty extends (require './meta')
     value=@get()
     opts.format ?= 'json'
     if @opts.serializer instanceof Function
-      @opts.serializer.call @parent, value, opts
-    else
-      value
+      @opts.serializer.call this, value, opts
+    else switch @opts.type
+      when 'array'
+        value.map (e) -> switch
+          when e.serialize instanceof Function then e.serialize opts
+          else e
+      else
+        value
 
 module.exports = SynthProperty

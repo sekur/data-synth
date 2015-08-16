@@ -7,13 +7,28 @@ class ListProperty extends (require '../property')
       @constructor.set type: 'array', subtype: (@constructor.get 'type')
     super
 
-  get: (query={}) ->
+  get: (key) ->
+    list = (super null).map (x) -> x.get?() ? x
+    return list unless key?
+    mkey = @meta 'key'
+    for item in list when key is item[mkey]
+      return item
+    undefined
+
+  match: (query={}) ->
     super
       .map (x) -> x.get?() ? x
       .where query
 
+  access: (key) ->
+    mkey = @meta 'key'
+    for item in @value
+      check = (item.get? mkey) ? item[mkey]
+      if key is check
+        return item
+    undefined
   push: ->
-    list = @get()
+    list = @value
     Array::push.apply list, arguments
     @set list
 
