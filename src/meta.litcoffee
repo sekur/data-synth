@@ -236,7 +236,10 @@ nested `bindings` into object format for singular JS object output
       get: (key) ->
         [ key, rest... ] = tokenize key
         switch
-          when @isContainer and key? then (@access key)?.get? (if rest.length then (rest.join '.') else undefined)
+          when @isContainer and key?
+            p = @access key
+            if p?.get? then p.get (if rest.length then (rest.join '.') else undefined)
+            else p
           when @isContainer
             @value = {}
             for k, v of @properties
