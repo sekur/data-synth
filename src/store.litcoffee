@@ -4,14 +4,24 @@ The `SynthStore` represents the primary container construct for managing various
 
     #ModelRegistry = require './registry/model'
 
+    Promise = require 'promise'
+
     class SynthStore extends (require './model')
       @set synth: 'store', models: [], controllers: []
+
       @mixin (require 'events').EventEmitter
 
       @schema
         models: @computed (-> (@constructor.get 'models') ), type: 'array', private: true
 
-The below `register` for DataStore accepts one or more models and adds
+The below `invoke` for the `SynthStore` is a magical
+one-liner... Figuring out how it works is an exercise left to the
+reader. :-)
+
+      invoke: (event, args...) ->
+        Promise.all (@listeners event).map (f) => super ([f].concat args)... 
+
+The below `register` for `SynthStore` accepts one or more models and adds
 to internal `ModelRegistry` instance.
 
       register: (models...) ->
@@ -27,8 +37,5 @@ PUBLIC access methods for working directly with PRIVATE _models registry
       contains: (key) ->
         prop = @access key
         prop if prop instanceof Model.Registry.Property
-
-      infuse: (opts) ->
-        console.log "using: #{opts?.source}"
 
     module.exports = SynthStore

@@ -27,10 +27,12 @@ class ListProperty extends (require '../property')
       if key is check
         return item
     undefined
-  push: ->
-    list = @value
-    Array::push.apply list, arguments
-    @set list
+    
+  push: -> @set @value.concat arguments...
+
+  remove: (keys...) ->
+    query = ListProperty.objectify (@meta 'key'), [].concat keys...
+    @set @value.without query
 
   Meta = require '../meta'
   normalize: ->

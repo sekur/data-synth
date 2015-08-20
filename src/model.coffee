@@ -38,6 +38,9 @@ class ModelRegistry extends Registry
 
   contains: (key) -> (@access key)
 
+
+Promise = require 'promise'
+
 class SynthModel extends (require './object')
   @set synth: 'model'
 
@@ -57,10 +60,42 @@ class SynthModel extends (require './object')
       @merge opts
 
   @schema
+    modifiedOn: @attr 'date', private: true
     # internal tracking of bound model records (those that should be
     # destroyed when this record is destroyed)
     children: @hasMany SynthModel, private: true
 
+  # invoke allows you to apply arbitrary function on the Model as a Promise
+  invoke: (action, args..., cb) ->
+    new Promise (resolve, reject) =>
+      if cb instanceof Function
+        action.apply this, args.concat ->
+          try resolve cb.apply null, arguments
+          catch err then reject err
+      else
+        try resolve action.apply this, args.concat cb
+        catch err then reject err
+
+  set: ->
+    # before setting ANY new value, keep track of any changes
+    # only after successful 'save' the transaction logs are cleared
+    super
+
+  save: ->
+    # XXX - a bit ugly at the moment...
+    # console.log 'SAVING:'
+    isValid = @validate()
+    # console.log isValid
+    if isValid.length is 0
+      (@set 'modifiedOn', new Date) if @isDirty()
+      @clearDirty()
+      @_models.add this
+      this
+    else
+      null
+
+  rollback: ->
+    
   RelationshipProperty = (require './property/relationship')
 
   getRelationships: (kind) ->
@@ -87,31 +122,8 @@ class SynthModel extends (require './object')
           return false unless x is v
       return true
 
-  save: ->
-    # XXX - a bit ugly at the moment...
-    # console.log 'SAVING:'
-    isValid = @validate()
-    # console.log isValid
-    if isValid.length is 0
-        (@set 'modifiedOn', new Date) if @isDirty()
-        @clearDirty()
-        @_models.add this
-        this
-    else
-        null
-
   destroy: ->
       record.destroy() for record in @get '_bindings'
       @_models.remove this
-
-  Promise = require 'promise'
-  invoke: (action, args...) ->
-    new Promise (resolve, reject) =>
-      try
-        unless action instanceof Function
-          action = (@access action)?.exec
-        resolve (action?.apply this, args)
-      catch err
-        reject err
 
 module.exports = SynthModel

@@ -30,7 +30,7 @@ class SynthObject extends Meta
       .map (key) => Meta.objectify key, super key
       .reduce ((a, b) -> Meta.copy a, b), {}
 
-  set: -> super; @value ?= {}
+  #set: -> super; @value ?= {}
         
   addProperty: (key, property) ->
     if not (@hasProperty key) and property instanceof Meta

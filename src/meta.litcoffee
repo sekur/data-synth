@@ -173,14 +173,15 @@ function.
 The following `reduce` provides meta data extrapolation by collapsing
 nested `bindings` into object format for singular JS object output
 
-      @reduce: ->
-        o = meta: @extract()
-        for key, val of o.meta.bindings
+      @reduce: (combine=false) ->
+        meta = @extract()
+        o = if combine then meta else meta: meta
+        for key, val of meta.bindings
           o[key] = switch
-            when (@instanceof val) then val.reduce()
+            when (@instanceof val) then val.reduce combine
             else val
-        delete o.meta.bindings
-        delete o.meta.exports
+        delete meta.bindings
+        delete meta.exports
         return o
         
 ## meta class instance prototypes
@@ -252,7 +253,9 @@ nested `bindings` into object format for singular JS object output
         if typeof key is 'string' and val?
           key = Meta.objectify key, val
         if @isContainer and key instanceof Object
-          (@access k)?.set? v for k, v of key
+          for k, v of key when @properties.hasOwnProperty k
+            p = @access k
+            if p?.set? then p.set v else @properties[k] = v
         else
           @value = key
         this
