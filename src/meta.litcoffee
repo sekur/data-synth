@@ -80,7 +80,7 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
         root = root?[key] while (key = composite.shift())
         root
       @extract: (keys...) ->
-        return Meta.copy {}, @__meta__ unless keys.length > 0
+        return Meta.copy {}, (@__meta__ ? this) unless keys.length > 0
         res = {}
         Meta.copy res, Meta.objectify key, @get key for key in keys
         res
@@ -173,13 +173,14 @@ function.
 The following `reduce` provides meta data extrapolation by collapsing
 nested `bindings` into object format for singular JS object output
 
-      @reduce: (combine=false) ->
+      @reduce: (opts={}) ->
         meta = @extract()
-        o = if combine then meta else meta: meta
-        for key, val of meta.bindings
-          o[key] = switch
-            when (@instanceof val) then val.reduce combine
-            else val
+        o = if opts.combine then meta else meta: meta
+        if not opts.depth? or opts.depth-- > 0
+          for key, val of meta.bindings
+            o[key] = switch
+              when (@instanceof val) then val.reduce opts
+              else val
         delete meta.bindings
         delete meta.exports
         return o

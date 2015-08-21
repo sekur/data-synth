@@ -56,9 +56,7 @@ class SynthProperty extends (require './meta')
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
-    
     super
-
     console.assert @parent?,
         "cannot instantiate a new property without containing object reference"
 
@@ -84,6 +82,8 @@ class SynthProperty extends (require './meta')
     switch
       when @opts.normalizer instanceof Function
         @opts.normalizer.call @parent, value
+      when @opts.type instanceof Function and typeof value is 'string'
+        new @opts.type value
       when @opts.type is 'date' and typeof value is 'string'
         new Date value
       when @opts.type is 'boolean' and typeof value is 'string'
@@ -103,10 +103,12 @@ class SynthProperty extends (require './meta')
 
   validate: (value) ->
     switch
-      when @opts.validator instanceof Function
-        @opts.validator.call @parent, value
       when not value?
         @opts.required is false
+      when @opts.validator instanceof Function
+        @opts.validator.call @parent, value
+      when @opts.type instanceof Function
+        value instanceof @opts.type
       else switch @opts.type
         when 'string' or 'number' or 'boolean' or 'object'
           typeof value is @opts.type
