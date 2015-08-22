@@ -191,9 +191,7 @@ nested `bindings` into object format for singular JS object output
         return class extends Meta if @constructor is Object
 
         @attach k, v for k, v of (@constructor.get? 'bindings')
-        @isConstructing = true
-        @set value
-        delete @isConstructing
+        @set value if value?
 
       attach: (key, val) -> switch
         when (Meta.instanceof val)

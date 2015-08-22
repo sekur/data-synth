@@ -46,29 +46,52 @@ Array::pushRecord = (record) ->
    return null if typeof record isnt "object"
    @push record unless @contains(id:record.id)
 
+#
+# Built-in types:
+# date, boolean, string, array, and mixed
 
 class SynthProperty extends (require './meta')
   @set synth: 'property', config: true, required: false, unique: false, private: false
   @set options: [
-    'type', 'units', 'enum', 'required', 'unique', 'private', 'config', 'default', 'normalizer', 'validator', 'serializer'
+    'type', 'instance', 'types', 'units', 'required', 'unique', 'private', 'config', 'default',
+    'normalizer', 'validator', 'serializer'
   ]
 
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
     super
+    @opts.default ?= [] if @opts.type is 'array'
+    @value ?= (@opts.default?.call? this) ? @opts.default
+
+    # XXX - do we *really* need this assertion?
     console.assert @parent?,
-        "cannot instantiate a new property without containing object reference"
+      "cannot instantiate a new '#{@opts.type}' property without containing object reference"
+
+    console.assert (@opts.type isnt 'mixed') or (@opts.types? and @opts.types.length > 0),
+      "cannot instantiate a new 'mixed' property without 'types' array defined"
+
+  get: -> v = super; v?.get?() ? v
 
   set: (value) ->
-    value ?= switch
-      when typeof @opts.default is 'function' then @opts.default.call @parent
-      else @opts.default
+    console.assert @opts.type?,
+      "cannot set a value to a property without type for #{@parent}"
+      
+    value ?= (@opts.default?.call? this) ? @opts.default
     cval = @value
-    nval = @normalize value
+
+    if @opts.type is 'mixed'
+      for type in @opts.types
+        try
+          nval = @normalize value, type: type
+          @activeType = type
+          break
+        catch e
+    else
+      nval = @normalize value
 
     #console.log "setting #{value} normalized to #{nval}"
-    console.assert @isConstructing or (@validate nval) is true,
+    console.assert (@validate nval) is true,
       "unable to validate passed in '#{nval}' as '#{@opts.type}' for setting on this property"
 
     @isDirty = switch
@@ -78,46 +101,51 @@ class SynthProperty extends (require './meta')
       else true
     @value = nval
 
-  normalize: (value) ->
+  normalize: (value, opts=@opts) ->
+    if opts.normalizer instanceof Function
+      return opts.normalizer.call this, value
+    return unless value?
+    
     switch
-      when @opts.normalizer instanceof Function
-        @opts.normalizer.call @parent, value
-      when @opts.type instanceof Function and typeof value is 'string'
-        new @opts.type value
-      when @opts.type is 'date' and typeof value is 'string'
+      when opts.type instanceof Function and typeof value is 'string'
+        new opts.type value
+      when opts.type is 'date' and typeof value is 'string'
         new Date value
-      when @opts.type is 'boolean' and typeof value is 'string'
+      when opts.type is 'boolean' and typeof value is 'string'
         value is 'true'
-      when @opts.type is 'enumeration' and typeof value is 'number'
-        for key, val of @opts.enum
-          return key if val.value is value or val.value is "#{value}"
-        value
-      when @opts.type is 'array'
+      when opts.type is 'number' and typeof value is 'string'
+        (Number) value
+      when opts.type is 'array'
         unless value instanceof Array
           value = if value? then [ value ] else []
         value = value.filter (e) -> e? and !!e
-        value = value.unique() if @opts.unique is true
+        value = value.unique() if opts.unique is true
         value
+      when opts.instance? and not (value instanceof opts.instance)
+        new opts.instance value, this
       else
         value
 
-  validate: (value) ->
+  validate: (value, opts=@opts) ->
     switch
       when not value?
-        @opts.required is false
-      when @opts.validator instanceof Function
-        @opts.validator.call @parent, value
-      when @opts.type instanceof Function
-        value instanceof @opts.type
-      else switch @opts.type
-        when 'string' or 'number' or 'boolean' or 'object'
-          typeof value is @opts.type
+        opts.required is false
+      when opts.validator instanceof Function
+        opts.validator.call this, value
+      when opts.type instanceof Function
+        value instanceof opts.type
+      else switch opts.type
+        when 'string', 'number', 'boolean', 'object'
+          (typeof value is opts.type) or (opts.instance? and value instanceof opts.instance)
         when 'date'
           value instanceof Date
         when 'array'
           value instanceof Array
         else
-          true
+          if opts.instance?
+            value instanceof opts.instance
+          else
+            true
 
   serialize: (opts={}) ->
     value=@get()
