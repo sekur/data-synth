@@ -1,7 +1,7 @@
 Meta = require './meta'
 
 class SynthObject extends Meta
-  @set synth: 'object', default: {}
+  @set synth: 'object'
 
   @schema = (obj) -> @bind k, v for k, v of obj
 

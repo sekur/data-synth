@@ -20,14 +20,14 @@
               unless dest[p] instanceof Object
                 k = dest[p]
                 dest[p] = {}
-                dest[p][k] = undefined
+                dest[p][k] = null
               arguments.callee dest[p], src[p], append
             when append is true and dest[p]?
               unless dest[p] instanceof Object
                 k = dest[p]
                 dest[p] = {}
-                dest[p][k] = undefined
-              dest[p][src[p]] = undefined
+                dest[p][k] = null
+              dest[p][src[p]] = null
             else dest[p] = src[p]
         return dest
       @objectify: (key, val) ->
@@ -82,7 +82,7 @@ The following `get/extract/match` provide meta data retrieval mechanisms.
       @extract: (keys...) ->
         return Meta.copy {}, (@__meta__ ? this) unless keys.length > 0
         res = {}
-        Meta.copy res, Meta.objectify key, @get key for key in keys
+        Meta.copy res, Meta.objectify key, (@get? key) ? @[key] for key in keys
         res
       @match: (regex) ->
         root = @__meta__ ? this
@@ -171,11 +171,12 @@ function.
       @rebind: (key, func) -> @bind key, func? (@unbind key)
 
 The following `reduce` provides meta data extrapolation by collapsing
-nested `bindings` into object format for singular JS object output
+nested `Meta` instances into object format for singular JS object
+output
 
       @reduce: (opts={}) ->
         meta = @extract()
-        o = if opts.combine then meta else meta: meta
+        o = meta: meta
         if not opts.depth? or opts.depth-- > 0
           for key, val of meta.bindings
             o[key] = switch
@@ -183,6 +184,10 @@ nested `bindings` into object format for singular JS object output
               else val
         delete meta.bindings
         delete meta.exports
+        for key, val of meta
+          meta[key] = switch
+            when (@instanceof val) then val.reduce opts
+            else val
         return o
         
 ## meta class instance prototypes

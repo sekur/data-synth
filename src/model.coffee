@@ -59,12 +59,6 @@ class SynthModel extends (require './object')
       @set func: func
       @merge opts
 
-  @schema
-    modifiedOn: @attr 'date', private: true
-    # internal tracking of bound model records (those that should be
-    # destroyed when this record is destroyed)
-    children: @hasMany SynthModel, private: true
-
   # invoke allows you to apply arbitrary function on the Model as a Promise
   invoke: (action, args..., cb) ->
     new Promise (resolve, reject) =>
@@ -87,7 +81,7 @@ class SynthModel extends (require './object')
     isValid = @validate()
     # console.log isValid
     if isValid.length is 0
-      (@set 'modifiedOn', new Date) if @isDirty()
+      #(@set 'modifiedOn', new Date) if @isDirty()
       @clearDirty()
       @_models.add this
       this

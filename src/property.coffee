@@ -75,7 +75,7 @@ class SynthProperty extends (require './meta')
 
   set: (value) ->
     console.assert @opts.type?,
-      "cannot set a value to a property without type for #{@parent}"
+      "cannot set a value to a property without type"
       
     value ?= (@opts.default?.call? this) ? @opts.default
     cval = @value
@@ -107,8 +107,8 @@ class SynthProperty extends (require './meta')
     return unless value?
     
     switch
-      when opts.type instanceof Function and typeof value is 'string'
-        new opts.type value
+      when opts.type instanceof Function and not (value instanceof opts.type)
+        new opts.type value, this
       when opts.type is 'date' and typeof value is 'string'
         new Date value
       when opts.type is 'boolean' and typeof value is 'string'
