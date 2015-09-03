@@ -53,7 +53,7 @@ Array::pushRecord = (record) ->
 class SynthProperty extends (require './meta')
   @set synth: 'property', config: true, required: false, unique: false, private: false
   @set options: [
-    'type', 'instance', 'types', 'units', 'required', 'unique', 'private', 'config', 'default',
+    'type', 'types', 'units', 'required', 'unique', 'private', 'config', 'default',
     'normalizer', 'validator', 'serializer'
   ]
 
@@ -109,6 +109,8 @@ class SynthProperty extends (require './meta')
     switch
       when opts.type instanceof Function and not (value instanceof opts.type)
         new opts.type value, this
+      when opts.type is 'string' and typeof value isnt 'string'
+        "#{value}"
       when opts.type is 'date' and typeof value is 'string'
         new Date value
       when opts.type is 'boolean' and typeof value is 'string'
@@ -121,12 +123,10 @@ class SynthProperty extends (require './meta')
         value = value.filter (e) -> e? and !!e
         value = value.unique() if opts.unique is true
         value
-      when opts.instance? and not (value instanceof opts.instance)
-        new opts.instance value, this
       else
         value
 
-  validate: (value, opts=@opts) ->
+  validate: (value=@value, opts=@opts) ->
     switch
       when not value?
         opts.required is false
@@ -136,16 +136,12 @@ class SynthProperty extends (require './meta')
         value instanceof opts.type
       else switch opts.type
         when 'string', 'number', 'boolean', 'object'
-          (typeof value is opts.type) or (opts.instance? and value instanceof opts.instance)
+          typeof value is opts.type
         when 'date'
           value instanceof Date
         when 'array'
           value instanceof Array
-        else
-          if opts.instance?
-            value instanceof opts.instance
-          else
-            true
+        else true
 
   serialize: (opts={}) ->
     value=@get()

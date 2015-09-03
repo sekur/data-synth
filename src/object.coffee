@@ -1,4 +1,5 @@
 Meta = require './meta'
+Promise = require 'promise'
 
 class SynthObject extends Meta
   @set synth: 'object'
@@ -20,6 +21,20 @@ class SynthObject extends Meta
       @set func: func
       @merge opts
 
+  # invoke allows you to apply arbitrary function on the Object as a Promise
+  invoke: (action, args..., cb) ->
+    unless action instanceof Function
+      return Promise.reject "cannot invoke without providing 'action' as a function"
+      
+    new Promise (resolve, reject) =>
+      if cb instanceof Function
+        action.apply this, args.concat ->
+          try resolve cb.apply null, arguments
+          catch err then reject err
+      else
+        try resolve action.apply this, args.concat cb
+        catch err then reject err
+
   get: (keys...) ->
     keys = keys.filter (e) -> !!e
     switch keys.length
@@ -30,8 +45,6 @@ class SynthObject extends Meta
       .map (key) => Meta.objectify key, super key
       .reduce ((a, b) -> Meta.copy a, b), {}
 
-  #set: -> super; @value ?= {}
-        
   addProperty: (key, property) ->
     if not (@hasProperty key) and property instanceof Meta
       @properties[key] = property
@@ -40,8 +53,7 @@ class SynthObject extends Meta
   hasProperty: (key) -> @properties.hasOwnProperty key
   everyProperty: (func) -> (func?.call prop, key) for key, prop of @properties
 
-  validate: -> (@everyProperty (key) -> name: key, isValid: @validate()).filter (e) -> e.isValid is false
-
+  validate: -> (prop for k, prop of @properties).every (e) -> (not e?.validate?) or e.validate()
   serialize: (opts={}) ->
     opts.format ?= 'json'
     o = switch opts.format

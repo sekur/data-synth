@@ -42,7 +42,7 @@ class ListProperty extends (require '../property')
         else new @opts.subtype x, this
       else x
 
-  validate: (value) ->
+  validate: (value=@value) ->
     isClass = @opts.subtype instanceof Function
     super and value.every (x) =>
       (not @opts.subtype?) or (typeof x is @opts.subtype) or (isClass and x instanceof @opts.subtype)

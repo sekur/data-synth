@@ -9,17 +9,8 @@ The `SynthStore` represents the primary container construct for managing various
     class SynthStore extends (require './model')
       @set synth: 'store', models: [], controllers: []
 
-      @mixin (require 'events').EventEmitter
-
       @schema
         models: @computed (-> (@constructor.get 'models') ), type: 'array', private: true
-
-The below `invoke` for the `SynthStore` is a magical
-one-liner... Figuring out how it works is an exercise left to the
-reader. :-)
-
-      invoke: (event, args...) ->
-        Promise.all (@listeners event).map (f) => super ([f].concat args)... 
 
 The below `register` for `SynthStore` accepts one or more models and adds
 to internal `ModelRegistry` instance.

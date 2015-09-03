@@ -44,6 +44,8 @@ Promise = require 'promise'
 class SynthModel extends (require './object')
   @set synth: 'model'
 
+  @mixin (require 'events').EventEmitter
+
   @belongsTo = (model, opts) ->
     class extends (require './property/belongsTo')
       @set model: model
@@ -59,42 +61,45 @@ class SynthModel extends (require './object')
       @set func: func
       @merge opts
 
-  # invoke allows you to apply arbitrary function on the Model as a Promise
-  invoke: (action, args..., cb) ->
-    new Promise (resolve, reject) =>
-      if cb instanceof Function
-        action.apply this, args.concat ->
-          try resolve cb.apply null, arguments
-          catch err then reject err
-      else
-        try resolve action.apply this, args.concat cb
-        catch err then reject err
+  constructor: ->
+    # register a default '[save]' handler event
+    @on '[save]', ->
+      @invoke '[beforeSave]', arguments...
+      .then (res) =>
+        console.log 'validating model...'
+        if @validate()
+          console.log 'validate OK'
+          #(@set 'modifiedOn', new Date) if @isDirty()
+          @clearDirty()
+          #@_models.add this
+          @invoke '[afterSave]'
+          .then (res) => return this
+        else
+          console.warn 'validate FAIL'
+          return null
+    super
+
+  # The below `invoke` for the `SynthModel` is a magical
+  # one-liner... Figuring out how it works is an exercise left to the
+  # reader. :-)
+  invoke: (event, args...) ->
+    Promise.all (@listeners event).map (f) => super ([f].concat args)... 
 
   set: ->
     # before setting ANY new value, keep track of any changes
     # only after successful 'save' the transaction logs are cleared
     super
 
-  save: ->
-    # XXX - a bit ugly at the moment...
-    # console.log 'SAVING:'
-    isValid = @validate()
-    # console.log isValid
-    if isValid.length is 0
-      #(@set 'modifiedOn', new Date) if @isDirty()
-      @clearDirty()
-      @_models.add this
-      this
-    else
-      null
+  # This is a convenince wrapper to invoke internal '[save]' event
+  save: -> @invoke '[save]', arguments...
 
   rollback: ->
     
   RelationshipProperty = (require './property/relationship')
 
   getRelationships: (kind) ->
-      @everyProperty (key) -> this if this instanceof RelationshipProperty
-      .filter (x) -> x? and (not kind? or kind is (x.constructor.get 'kind'))
+    @everyProperty (key) -> this if this instanceof RelationshipProperty
+    .filter (x) -> x? and (not kind? or kind is (x.constructor.get 'kind'))
 
   ###*
   # `bind` subjugates passed in records to be bound to the lifespan of
