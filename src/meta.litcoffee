@@ -136,9 +136,10 @@ The following `set/merge` provide meta data update mechanisms.
             Array.prototype.push.apply target, obj
           when target instanceof Object and obj instanceof Object
             @set "#{key}.#{k}", v for k, v of obj
+          when typeof target is typeof obj
+            @set key, obj
           else
-            console.assert typeof target is typeof obj,
-              "cannot perform merge for '#{key}' with existing value type (#{typeof target}) conflicting with passed-in value (#{typeof obj})"
+            console.warn "performing merge for '#{key}' with existing value type (#{typeof target}) conflicting with passed-in value (#{typeof obj})"
             @set key, obj
         this
 

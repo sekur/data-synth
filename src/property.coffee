@@ -1,61 +1,61 @@
 Array::equals = (x) -> @length is x.length and @every (e, i) -> e is x[i]
 
-Array::unique = ->
-   return @ unless @length > 0
-   output = {}
-   for key in [0..@length-1]
-     val = @[key]
-     switch
-       when typeof val is 'object' and val.id?
-         output[val.id] = val
-       else
-         output[val] = val
-   #output[@[key]] = @[key] for key in [0...@length]
-   value for key, value of output
+Array::unique = (key) ->
+  return @ unless @length > 0
+  output = {}
+  unless key?
+    output[@[key]] = @[key] for key in [0...@length]
+  else
+    for k in [0..@length-1] when typeof @[k] is 'object'
+      val = @[k]
+      idx = val[key]
+      idx ?= val.get? key
+      #console.log "Array::unique with #{key} as #{idx}"
+      continue unless idx?
+      output[idx] = val
+  (value for key, value of output)
 
 Array::contains = (query) ->
-   return false if typeof query isnt "object"
-   hit = Object.keys(query).length
-   @some (item) ->
-     match = 0
-     for key, val of query
-       match += 1 if item[key] is val
-     if match is hit then true else false
+  return false if typeof query isnt "object"
+  hit = Object.keys(query).length
+  @some (item) ->
+    match = 0
+    for key, val of query
+      match += 1 if item[key] is val
+    if match is hit then true else false
 
 Array::where = (query) ->
-   return [] if typeof query isnt "object"
-   hit = Object.keys(query).length
-   return this unless hit > 0
-   @filter (item) ->
-     match = 0
-     for key, val of query
-       match += 1 if item[key] is val
-     if match is hit then true else false
+  return [] if typeof query isnt "object"
+  hit = Object.keys(query).length
+  return this unless hit > 0
+  @filter (item) ->
+    match = 0
+    for key, val of query
+      match += 1 if item[key] is val
+    if match is hit then true else false
 
 Array::without = (query) ->
-   return this if typeof query isnt "object"
-   @filter (item) ->
-     for key, val of query
-       match = switch
-         when val instanceof Array then item[key] in val
-         else item[key] is val
-       return true unless match
-     false # item matched all query params
+  return this if typeof query isnt "object"
+  @filter (item) ->
+    for key, val of query
+      match = switch
+        when val instanceof Array then item[key] in val
+        else item[key] is val
+      return true unless match
+    false # item matched all query params
 
 Array::pushRecord = (record) ->
-   return null if typeof record isnt "object"
-   @push record unless @contains(id:record.id)
+  return null if typeof record isnt "object"
+  @push record unless @contains(id:record.id)
 
-#
 # Built-in types:
 # date, boolean, string, array, and mixed
 
 class SynthProperty extends (require './meta')
   @set synth: 'property', config: true, required: false, unique: false, private: false
-  @set options: [
-    'type', 'types', 'units', 'required', 'unique', 'private', 'config', 'default',
-    'normalizer', 'validator', 'serializer'
-  ]
+  @set options: [ 'type', 'types', 'subtype', 'key', 'units',
+    'required', 'unique', 'private', 'config', 'default',
+    'normalizer', 'validator', 'serializer' ]
 
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
@@ -118,10 +118,11 @@ class SynthProperty extends (require './meta')
       when opts.type is 'number' and typeof value is 'string'
         (Number) value
       when opts.type is 'array'
+        #console.log "normalize array... with key: #{opts.key} [#{opts.unique}]"
         unless value instanceof Array
           value = if value? then [ value ] else []
         value = value.filter (e) -> e? and !!e
-        value = value.unique() if opts.unique is true
+        value = value.unique opts.key if opts.unique is true
         value
       else
         value
