@@ -3,14 +3,8 @@
 The `SynthStore` represents the primary container construct for managing various `Models`.
 
     #ModelRegistry = require './registry/model'
-
-    Promise = require 'promise'
-
     class SynthStore extends (require './model')
-      @set synth: 'store', models: [], controllers: []
-
-      @schema
-        models: @computed (-> (@constructor.get 'models') ), type: 'array', private: true
+      @set synth: 'store'
 
 The below `register` for `SynthStore` accepts one or more models and adds
 to internal `ModelRegistry` instance.

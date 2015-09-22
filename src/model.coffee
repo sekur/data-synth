@@ -38,9 +38,6 @@ class ModelRegistry extends Registry
 
   contains: (key) -> (@access key)
 
-
-Promise = require 'promise'
-
 class SynthModel extends (require './object')
   @set synth: 'model'
 
@@ -82,8 +79,8 @@ class SynthModel extends (require './object')
   # The below `invoke` for the `SynthModel` is a magical
   # one-liner... Figuring out how it works is an exercise left to the
   # reader. :-)
-  invoke: (event, args...) ->
-    Promise.all (@listeners event).map (f) => super ([f].concat args)... 
+  # invoke: (event, args...) ->
+  #   Promise.all (@listeners event).map (f) => super ([f].concat args)... 
 
   set: ->
     # before setting ANY new value, keep track of any changes

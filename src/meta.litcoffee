@@ -1,7 +1,8 @@
 # meta-class 
 
+    Promise = require 'promise'
     class Meta
-      @__meta__: synth: 'meta', bindings: {}, exports: {}
+      @__meta__: synth: 'meta'
       @__version__: 3
 
 ## general utility helper functions
@@ -65,7 +66,7 @@ obj(s) into itself.
           continue unless Meta.instanceof obj
           # when mixing in another Meta object, merge the 'bindings'
           # as well
-          @merge obj.extract 'bindings', 'exports'
+          @merge obj.extract 'bindings'
         this
 
 
@@ -152,6 +153,10 @@ resolve to a pre-existing instance of Meta class that supports `bind`
 function.
         
       @bind: (key, obj) ->
+        return this unless key?
+        unless typeof key is 'string'
+          (@bind k, v) for k, v of key
+          return this
         [ key, rest... ] = tokenize key
         if rest.length > 0
           res = (@get "bindings.#{key}")?.bind? (rest.join '.'), obj
@@ -184,7 +189,6 @@ output
               when (@instanceof val) then val.reduce opts
               else val
         delete meta.bindings
-        delete meta.exports
         for key, val of meta
           meta[key] = switch
             when (@instanceof val) then val.reduce opts
@@ -193,27 +197,30 @@ output
         
 ## meta class instance prototypes
 
-      constructor: (value, @parent) ->
+      constructor: (value, parent) ->
         return class extends Meta if @constructor is Object
-
+        @parent = parent if parent?
         @attach k, v for k, v of (@constructor.get? 'bindings')
         @set value if value?
 
-      attach: (key, val) -> switch
-        when (Meta.instanceof val)
-          @properties ?= {}
-          @properties[key] = new val undefined, this
-          @isContainer = true
-        when val instanceof Function
-          @methods ?= {}
-          @methods[key] = val
-        when val?.constructor is Object
-          (@attach "#{key}:#{k}", v) for k,v of val
-        else
-          @properties ?= {}
-          @properties[key] = val
+      valueOf:  -> @constructor.extract()
+      toString: -> JSON.stringify @get()
 
-      fork: (f) -> f?.call? (new @constructor @get())
+      attach: (key, val) ->
+        switch
+          when (Meta.instanceof val)
+            @properties ?= {}
+            @properties[key] = new val undefined, this
+          when val instanceof Function
+            @methods ?= {}
+            @methods[key] = val
+          when val?.constructor is Object
+            (@attach "#{key}:#{k}", v) for k,v of val
+          else
+            @properties ?= {}
+            @properties[key] = val
+
+      fork: (f, args...) -> f?.apply? (new @constructor @get()), args
 
       meta: (key) -> @constructor.get key
 
@@ -242,11 +249,11 @@ output
       get: (key) ->
         [ key, rest... ] = tokenize key
         switch
-          when @isContainer and key?
+          when @properties? and key?
             p = @access key
             if p?.get? then p.get (if rest.length then (rest.join '.') else undefined)
             else p
-          when @isContainer
+          when @properties?
             @value = {}
             for k, v of @properties
               @value[k] = if v.get? then v.get?() else v
@@ -257,7 +264,7 @@ output
       set: (key, val) ->
         if typeof key is 'string' and val?
           key = Meta.objectify key, val
-        if @isContainer and key instanceof Object
+        if @properties? and key instanceof Object
           for k, v of key when @properties.hasOwnProperty k
             p = @access k
             if p?.set? then p.set v else @properties[k] = v
@@ -267,8 +274,10 @@ output
 
       invoke: (name, args...) ->
         method = @methods?[name]
-        console.assert method instanceof Function,
-          "cannot invoke undefined '#{name}' method"
-        method.apply this, args        
+        unless method instanceof Function
+          return Promise.reject "cannot invoke undefined '#{name}' method"
+
+        new Promise (resolve, reject) =>
+          method.apply this, args.concat [ resolve, reject ]
         
     module.exports = Meta

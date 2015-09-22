@@ -1,5 +1,4 @@
 Meta = require './meta'
-Promise = require 'promise'
 
 class SynthObject extends Meta
   @set synth: 'object'
@@ -20,20 +19,6 @@ class SynthObject extends Meta
     class extends (require './property/computed')
       @set func: func
       @merge opts
-
-  # invoke allows you to apply arbitrary function on the Object as a Promise
-  invoke: (action, args..., cb) ->
-    unless action instanceof Function
-      return Promise.reject "cannot invoke without providing 'action' as a function"
-      
-    new Promise (resolve, reject) =>
-      if cb instanceof Function
-        action.apply this, args.concat ->
-          try resolve cb.apply null, arguments
-          catch err then reject err
-      else
-        try resolve action.apply this, args.concat cb
-        catch err then reject err
 
   get: (keys...) ->
     keys = keys.filter (e) -> !!e
