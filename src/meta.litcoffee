@@ -204,7 +204,7 @@ output
         @set value if value?
 
       valueOf:  -> @constructor.extract()
-      toString: -> JSON.stringify @get()
+      toString: -> @meta 'name' ? @meta 'synth'
 
       attach: (key, val) ->
         switch
@@ -272,8 +272,9 @@ output
           @value = key
         this
 
-      invoke: (name, args...) ->
-        method = @methods?[name]
+      invoke: (input, args...) ->
+        method = input if input instanceof Function
+        method ?= @methods?[input]
         unless method instanceof Function
           return Promise.reject "cannot invoke undefined '#{name}' method"
 

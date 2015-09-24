@@ -48,7 +48,7 @@ class ListProperty extends (require '../property')
 
   validate: (value=@value) ->
     bounds = (x) =>
-      console.log "validating bounds for #{@opts.min} <= #{x} <= #{@opts.max}"
+      #console.log "validating bounds for #{@opts.min} <= #{x} <= #{@opts.max}"
       unless @opts.max?
         x >= @opts.min
       else
