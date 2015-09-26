@@ -76,6 +76,9 @@ class SynthModel extends (require './object')
           return null
     super
 
+  # for now...
+  fetch: -> undefined
+
   # The below `invoke` for the `SynthModel` is a magical
   # one-liner... Figuring out how it works is an exercise left to the
   # reader. :-)

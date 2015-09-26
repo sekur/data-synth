@@ -62,7 +62,7 @@ class SynthProperty extends (require './meta')
     @isDirty = false
     super
     @opts.default ?= [] if @opts.type is 'array'
-    @value ?= (@opts.default?.call? this) ? @normalize @opts.default
+    @value ?= (@opts.default?.call? this) ? @normalize @opts.default if @opts.default?
 
     console.assert (@opts.type isnt 'mixed') or (@opts.types? and @opts.types.length > 0),
       "cannot instantiate a new 'mixed' property without 'types' array defined"
