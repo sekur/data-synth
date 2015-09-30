@@ -38,8 +38,10 @@ class ModelRegistry extends Registry
 
   contains: (key) -> (@access key)
 
+uuid = require 'node-uuid'
+
 class SynthModel extends (require './object')
-  @set synth: 'model'
+  @set synth: 'model', name: undefined, records: undefined
 
   @mixin (require 'events').EventEmitter
 
@@ -60,7 +62,10 @@ class SynthModel extends (require './object')
 
   constructor: ->
     # register a default '[save]' handler event
-    @on '[save]', ->
+    @attach '[save]', (resolve, reject) ->
+      @constructor.merge "records.#{@get 'id'}", this
+      return resolve this
+
       @invoke '[beforeSave]', arguments...
       .then (res) =>
         console.log 'validating model...'
@@ -70,14 +75,19 @@ class SynthModel extends (require './object')
           @clearDirty()
           #@_models.add this
           @invoke '[afterSave]'
-          .then (res) => return this
+          .then (res) =>
+            @constructor.merge "records.#{@get 'id'}", this
+            return this
         else
           console.warn 'validate FAIL'
           return null
     super
+    @set 'id', uuid.v4() unless @get 'id'
 
   # for now...
-  fetch: -> undefined
+  fetch: (key) -> @meta "records.#{key}"
+
+  toString: -> @meta 'name'
 
   # The below `invoke` for the `SynthModel` is a magical
   # one-liner... Figuring out how it works is an exercise left to the

@@ -43,6 +43,15 @@ class ListProperty extends (require '../property')
       when (Meta.instanceof @opts.subtype)
         switch
           when x instanceof @opts.subtype then x
+          when (@opts.subtype.get 'synth') is 'model'
+            switch
+              when x instanceof Meta
+                new @opts.subtype x.get(), this
+              when x instanceof Object
+                for name, data of x
+                  res = (@seek synth: 'store')?.create name, data
+                  break;
+                res
           else new @opts.subtype x, this
       else x
 

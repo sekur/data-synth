@@ -4,23 +4,30 @@ The `SynthStore` represents the primary container construct for managing various
 
     #ModelRegistry = require './registry/model'
     class SynthStore extends (require './model')
-      @set synth: 'store'
+      @set synth: 'store', models: undefined
 
 The below `register` for `SynthStore` accepts one or more models and adds
 to internal `ModelRegistry` instance.
 
       register: (models...) ->
-        (@constructor.get 'registry').register model for model in models
+        for model in models when (SynthStore.instanceof model)
+          @constructor.merge "models.#{model.get 'name'}", model
 
-PUBLIC access methods for working directly with PRIVATE _models registry
+PUBLIC access methods for working directly with internal models registry
 
-      create: (type, data) -> null
-      find:   (type, query) -> @_models.find type, query
+      create: (type, data) ->
+        model = @meta "models.#{type}"
+        return unless model?
+        new model data, this
+
+      find: (type, query={}) ->
+        model = @meta "models.#{type}"
+        return unless model?
+        if query.id?
+          return model::fetch query.id
+        model::find query
+
       update: (type, id, data) -> null
       delete: (type, query) -> model.destroy() for model in (@find type, query)
-
-      contains: (key) ->
-        prop = @access key
-        prop if prop instanceof Model.Registry.Property
 
     module.exports = SynthStore

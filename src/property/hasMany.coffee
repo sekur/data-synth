@@ -10,7 +10,8 @@ class HasManyProperty extends (require './relationship')
     list.push value
     @set list
 
-  validate: (value=@get()) -> (super value) is true and value.every (e) => (@model::fetch e) instanceof @model
+  validate: (value=@get()) ->
+    (super value) is true and value.every (e) => (@model::fetch e) instanceof @model
 
   normalize: (value=@get()) ->
     value = super value

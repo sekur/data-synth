@@ -276,7 +276,7 @@ output
         method = input if input instanceof Function
         method ?= @methods?[input]
         unless method instanceof Function
-          return Promise.reject "cannot invoke undefined '#{name}' method"
+          return Promise.reject "cannot invoke undefined '#{input}' method"
 
         new Promise (resolve, reject) =>
           method.apply this, args.concat [ resolve, reject ]

@@ -49,12 +49,12 @@ Array::pushRecord = (record) ->
   @push record unless @contains(id:record.id)
 
 # Built-in types:
-# date, boolean, string, array, and mixed
+# date, boolean, string, and array
 
 class SynthProperty extends (require './meta')
-  @set synth: 'property', config: true, required: false, unique: false, private: false
-  @set options: [ 'type', 'types', 'subtype', 'key', 'units',
-    'required', 'unique', 'private', 'config', 'default',
+  @set synth: 'property', config: true, mandatory: false, unique: false, private: false
+  @set options: [ 'type', 'subtype', 'key', 'units',
+    'mandatory', 'unique', 'private', 'config', 'default',
     'normalizer', 'validator', 'serializer' ]
 
   constructor: ->
@@ -64,9 +64,6 @@ class SynthProperty extends (require './meta')
     @opts.default ?= [] if @opts.type is 'array'
     @value ?= (@opts.default?.call? this) ? @normalize @opts.default if @opts.default?
 
-    console.assert (@opts.type isnt 'mixed') or (@opts.types? and @opts.types.length > 0),
-      "cannot instantiate a new 'mixed' property without 'types' array defined"
-
   get: -> v = super; v?.get?() ? v
 
   set: (value) ->
@@ -75,16 +72,7 @@ class SynthProperty extends (require './meta')
       
     value ?= (@opts.default?.call? this) ? @opts.default
     cval = @value
-
-    if @opts.type is 'mixed'
-      for type in @opts.types
-        try
-          nval = @normalize value, type: type
-          @activeType = type
-          break
-        catch e
-    else
-      nval = @normalize value
+    nval = @normalize value
 
     #console.log "setting #{value} normalized to #{nval}"
     console.assert (@validate nval) is true,
@@ -103,8 +91,10 @@ class SynthProperty extends (require './meta')
     return unless value?
     
     switch
-      when opts.type instanceof Function and not (value instanceof opts.type)
-        new opts.type value, this
+      when (SynthProperty.instanceof opts.type) and not (value instanceof opts.type)
+        new opt.stype value, this
+      when opts.type instanceof Function
+        opts.type value
       when opts.type is 'string' and typeof value isnt 'string'
         "#{value}"
       when opts.type is 'date' and typeof value is 'string'
@@ -126,11 +116,13 @@ class SynthProperty extends (require './meta')
   validate: (value=@value, opts=@opts) ->
     switch
       when not value?
-        opts.required is false
+        opts.mandatory is false
       when opts.validator instanceof Function
         opts.validator.call this, value
-      when opts.type instanceof Function
+      when SynthProperty.instanceof opts.type
         value instanceof opts.type
+      when opts.type instanceof Function
+        value is (opts.type value)
       else switch opts.type
         when 'string', 'number', 'boolean', 'object'
           typeof value is opts.type

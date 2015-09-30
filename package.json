@@ -1,6 +1,6 @@
 {
   "name": "data-synth",
-  "version": "0.6.25",
+  "version": "0.6.26",
   "description": "Dynamic data model synthesizer",
   "author": "Peter K Lee <peter@corenova.com>",
   "homepage": "https://github.com/saintkepha/data-synth",
@@ -15,11 +15,11 @@
     "datastore",
     "datamodel",
     "model",
-		"synth",
-		"synthesize",
-		"factory",
-		"class",
-		"constructor"
+	"synth",
+	"synthesize",
+	"factory",
+	"class",
+	"constructor"
   ],
   "license": "MIT",
   "main": "lib/data-synth.js",
