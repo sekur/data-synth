@@ -42,9 +42,10 @@ class ListProperty extends (require '../property')
     super.map (x) => switch
       when (Meta.instanceof @opts.subtype)
         switch
-          when x instanceof @opts.subtype then x
+          when (x instanceof @opts.subtype) then x
           when (@opts.subtype.get 'synth') is 'model'
             switch
+              when @opts.subtype.instanceof x then x
               when x instanceof Meta
                 new @opts.subtype x.get(), this
               when x instanceof Object
@@ -57,7 +58,6 @@ class ListProperty extends (require '../property')
 
   validate: (value=@value) ->
     bounds = (x) =>
-      #console.log "validating bounds for #{@opts.min} <= #{x} <= #{@opts.max}"
       unless @opts.max?
         x >= @opts.min
       else
@@ -68,6 +68,7 @@ class ListProperty extends (require '../property')
         when not @opts.subtype? then true
         when @opts.subtype instanceof Function
           check = x instanceof @opts.subtype
+          check = @opts.subtype.instanceof x unless check
           check and (if x.validate? then x.validate() else true)
         else
           typeof x is @opts.subtype

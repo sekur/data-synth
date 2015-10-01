@@ -4,6 +4,7 @@ Array::unique = (key) ->
   return @ unless @length > 0
   output = {}
   unless key?
+    console.warn "no key specified for unique enforcement for #{@length} items"
     output[@[key]] = @[key] for key in [0...@length]
   else
     for k in [0..@length-1] when typeof @[k] is 'object'
@@ -37,6 +38,7 @@ Array::where = (query) ->
 Array::without = (query) ->
   return this if typeof query isnt "object"
   @filter (item) ->
+    item = item.get() if item.get instanceof Function
     for key, val of query
       match = switch
         when val instanceof Array then item[key] in val
@@ -76,7 +78,7 @@ class SynthProperty extends (require './meta')
 
     #console.log "setting #{value} normalized to #{nval}"
     console.assert (@validate nval) is true,
-      "unable to validate passed in '#{nval}' as '#{@opts.type}' for setting on this property"
+      "unable to validate passed in '#{nval}' as type '#{@opts.type}'"
 
     @isDirty = switch
       when not cval? and nval? then true
@@ -92,7 +94,7 @@ class SynthProperty extends (require './meta')
     
     switch
       when (SynthProperty.instanceof opts.type) and not (value instanceof opts.type)
-        new opt.stype value, this
+        new opts.type value, this
       when opts.type instanceof Function
         opts.type value
       when opts.type is 'string' and typeof value isnt 'string'

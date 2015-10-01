@@ -23,9 +23,10 @@ PUBLIC access methods for working directly with internal models registry
       find: (type, query={}) ->
         model = @meta "models.#{type}"
         return unless model?
-        if query.id?
-          return model::fetch query.id
-        model::find query
+        switch
+          when not (query instanceof Object) then model::fetch query
+          when query.id? then model::fetch query.id
+          else model::find query
 
       update: (type, id, data) -> null
       delete: (type, query) -> model.destroy() for model in (@find type, query)

@@ -43,6 +43,9 @@ uuid = require 'node-uuid'
 class SynthModel extends (require './object')
   @set synth: 'model', name: undefined, records: undefined
 
+  @instanceof = (x) ->
+    x instanceof this or x instanceof this.__super__?.constructor
+
   @mixin (require 'events').EventEmitter
 
   @belongsTo = (model, opts) ->
@@ -61,33 +64,48 @@ class SynthModel extends (require './object')
       @merge opts
 
   constructor: ->
-    # register a default '[save]' handler event
-    @attach '[save]', (resolve, reject) ->
-      @constructor.merge "records.#{@get 'id'}", this
-      return resolve this
-
-      @invoke '[beforeSave]', arguments...
-      .then (res) =>
-        console.log 'validating model...'
-        if @validate()
-          console.log 'validate OK'
-          #(@set 'modifiedOn', new Date) if @isDirty()
-          @clearDirty()
-          #@_models.add this
-          @invoke '[afterSave]'
-          .then (res) =>
-            @constructor.merge "records.#{@get 'id'}", this
-            return this
-        else
-          console.warn 'validate FAIL'
-          return null
+    # register a default 'save' and 'destroy' handler event (can be overridden)
+    @attach 'save',    (resolve, reject) -> return resolve this
+    @attach 'destroy', (resolve, reject) -> return resolve this
     super
-    @set 'id', uuid.v4() unless @get 'id'
+    @id = uuid.v4() # every model instance has a unique ID
 
-  # for now...
   fetch: (key) -> @meta "records.#{key}"
+  find:  (query) -> null
+  match: (query) ->
+    for k, v of query
+      x = (@access k)?.normalize (@get k)
+      x = "#{x}" if typeof x is 'boolean' and typeof v is 'string'
+      return false unless x is v
+    return true
 
-  toString: -> @meta 'name'
+  toString: -> "#{@meta 'name'}:#{@id}"
+
+  set: ->
+    # before setting ANY new value, keep track of any changes
+    # only after successful 'save' the transaction logs are cleared
+    super
+
+  # This is a convenince wrapper to invoke internal 'save' method
+  save: ->
+    @invoke 'save', arguments...
+    .then (res) =>
+      @id = (@get 'id') ? @id
+      @set 'id', @id
+      @clearDirty()
+      @constructor.set "records.#{@id}", this
+      return res
+
+  destroy: ->
+    @invoke 'destroy', arguments...
+    .then (res) =>
+      #record.destroy() for record in @get '_bindings'
+      @constructor.delete "records.#{@id}"
+      return res
+
+  rollback: ->
+    # TBD
+
 
   # The below `invoke` for the `SynthModel` is a magical
   # one-liner... Figuring out how it works is an exercise left to the
@@ -95,16 +113,6 @@ class SynthModel extends (require './object')
   # invoke: (event, args...) ->
   #   Promise.all (@listeners event).map (f) => super ([f].concat args)... 
 
-  set: ->
-    # before setting ANY new value, keep track of any changes
-    # only after successful 'save' the transaction logs are cleared
-    super
-
-  # This is a convenince wrapper to invoke internal '[save]' event
-  save: -> @invoke '[save]', arguments...
-
-  rollback: ->
-    
   RelationshipProperty = (require './property/relationship')
 
   getRelationships: (kind) ->
@@ -123,16 +131,5 @@ class SynthModel extends (require './object')
     for record in records
       continue unless record? and record instanceof SynthModel
       (@access 'children').push record.save()
-
-  match: (query) ->
-      for k, v of query
-          x = (@access k)?.normalize (@get k)
-          x = "#{x}" if typeof x is 'boolean' and typeof v is 'string'
-          return false unless x is v
-      return true
-
-  destroy: ->
-      record.destroy() for record in @get '_bindings'
-      @_models.remove this
 
 module.exports = SynthModel

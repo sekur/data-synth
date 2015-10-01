@@ -174,7 +174,7 @@ function.
         else
           @delete "bindings.#{key}"
 
-      @rebind: (key, func) -> @bind key, func? (@unbind key)
+      @rebind: (key, func) -> @bind key, func?.call this, (@unbind key)
 
 The following `reduce` provides meta data extrapolation by collapsing
 nested `Meta` instances into object format for singular JS object

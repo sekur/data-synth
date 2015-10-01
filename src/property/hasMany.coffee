@@ -10,8 +10,9 @@ class HasManyProperty extends (require './relationship')
     list.push value
     @set list
 
-  validate: (value=@get()) ->
-    (super value) is true and value.every (e) => (@model::fetch e) instanceof @model
+  set: (value) ->
+    try super
+    catch e then throw new Error "unable to validate has-many relationship of #{@model.get 'name'}"
 
   normalize: (value=@get()) ->
     value = super value
@@ -19,6 +20,9 @@ class HasManyProperty extends (require './relationship')
       when value instanceof Array
         (value.filter (e) -> e?).map (e) => BelongsToProperty::normalize.call this, e
       else undefined
+
+  validate: (value=@get()) ->
+    (super value) is true and value.every (e) => @model.instanceof (@model::fetch e)
 
   serialize: (opts={}) ->
     value=@get()

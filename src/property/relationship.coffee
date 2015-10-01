@@ -14,7 +14,7 @@ class RelationshipProperty extends (require '../property')
     assert @model instanceof Function,
         "cannot instantiate a new relationship without proper model class"
         
-    @opts.type ?= switch @opts.kind
+    @opts.type = switch @opts.kind
       when 'belongsTo' then 'string'
       when 'hasMany' then 'array'
 

@@ -1,6 +1,6 @@
 {
   "name": "data-synth",
-  "version": "0.6.26",
+  "version": "0.6.27",
   "description": "Dynamic data model synthesizer",
   "author": "Peter K Lee <peter@corenova.com>",
   "homepage": "https://github.com/saintkepha/data-synth",
