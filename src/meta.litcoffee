@@ -174,7 +174,12 @@ function.
         else
           @delete "bindings.#{key}"
 
-      @rebind: (key, func) -> @bind key, func?.call this, (@unbind key)
+      @rebind: (key, target) ->
+        prev = @unbind key
+        if target instanceof Function
+          @bind key, target.call this, prev
+        else
+          @bind key, target
 
 The following `reduce` provides meta data extrapolation by collapsing
 nested `Meta` instances into object format for singular JS object
@@ -200,7 +205,8 @@ output
       constructor: (value, parent) ->
         return class extends Meta if @constructor is Object
         @parent = parent if parent?
-        @attach k, v for k, v of (@constructor.get? 'bindings')
+        @constructor.rebind k, v for k, v of (@constructor.get 'overrides')
+        @attach k, v for k, v of (@constructor.get 'bindings')
         @set value if value?
 
       valueOf:  -> @constructor.extract()

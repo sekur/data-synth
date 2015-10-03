@@ -64,7 +64,9 @@ class SynthProperty extends (require './meta')
     @isDirty = false
     super
     @opts.default ?= [] if @opts.type is 'array'
-    @value ?= (@opts.default?.call? this) ? @normalize @opts.default if @opts.default?
+    @value ?= @normalize switch
+      when @opts.default instanceof Function then @opts.default.call @parent
+      else @opts.default
 
   get: -> v = super; v?.get?() ? v
 
@@ -72,7 +74,9 @@ class SynthProperty extends (require './meta')
     console.assert @opts.type?,
       "cannot set a value to a property without type"
       
-    value ?= (@opts.default?.call? this) ? @opts.default
+    value ?= switch
+      when @opts.default instanceof Function then @opts.default.call @parent
+      else @opts.default
     cval = @value
     nval = @normalize value
 
