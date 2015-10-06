@@ -4,13 +4,13 @@ Array::unique = (key) ->
   return @ unless @length > 0
   output = {}
   unless key?
-    console.warn "no key specified for unique enforcement for #{@length} items"
     output[@[key]] = @[key] for key in [0...@length]
   else
     for k in [0..@length-1] when typeof @[k] is 'object'
       val = @[k]
       idx = val[key]
       idx ?= val.get? key
+      idx ?= k
       #console.log "Array::unique with #{key} as #{idx}"
       continue unless idx?
       output[idx] = val
@@ -20,6 +20,7 @@ Array::contains = (query) ->
   return false if typeof query isnt "object"
   hit = Object.keys(query).length
   @some (item) ->
+    item = item.get() if item.get instanceof Function
     match = 0
     for key, val of query
       match += 1 if item[key] is val
@@ -27,20 +28,25 @@ Array::contains = (query) ->
 
 Array::where = (query) ->
   return [] if typeof query isnt "object"
-  hit = Object.keys(query).length
-  return this unless hit > 0
+  return this unless Object.keys(query).length > 0
   @filter (item) ->
-    match = 0
-    for key, val of query
-      match += 1 if item[key] is val
-    if match is hit then true else false
+    item = item.get() if item.get instanceof Function
+    for key, val of query when val?
+      match = switch
+        when val instanceof Function then val item[key]
+        when val instanceof Array then item[key] in val
+        else item[key] is val
+      return false unless match
+    true # item matched all query params
 
 Array::without = (query) ->
   return this if typeof query isnt "object"
+  return this unless Object.keys(query).length > 0
   @filter (item) ->
     item = item.get() if item.get instanceof Function
-    for key, val of query
+    for key, val of query when val?
       match = switch
+        when val instanceof Function then val item[key]
         when val instanceof Array then item[key] in val
         else item[key] is val
       return true unless match

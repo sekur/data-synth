@@ -3,7 +3,7 @@ BelongsToProperty = require './belongsTo'
 class HasManyProperty extends (require './relationship')
   @set kind: 'hasMany', unique: true, default: []
 
-  get: -> (super.map (e) => @model::fetch e).filter (e) -> e?
+  access: -> (super.map (e) => @model::fetch e).filter (e) -> e?
 
   push: (value) ->
     list = @get()
