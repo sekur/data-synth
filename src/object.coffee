@@ -38,7 +38,15 @@ class SynthObject extends Meta
   hasProperty: (key) -> @properties.hasOwnProperty key
   everyProperty: (func) -> (func?.call prop, key) for key, prop of @properties
 
-  validate: -> (prop for k, prop of @properties).every (e) -> (not e?.validate?) or e.validate()
+  validate: ->
+    @errors = []
+    for k, prop of @properties
+      continue unless prop?.validate?
+      @errors.push k unless prop.validate()
+    if @errors.length > 0
+      console.warn "validation errors: #{@errors}"
+    @errors.length is 0
+
   serialize: (opts={}) ->
     opts.format ?= 'json'
     o = switch opts.format

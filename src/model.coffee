@@ -47,6 +47,12 @@ class SynthModel extends (require './object')
     return false unless x?
     x instanceof this or x instanceof this.__super__?.constructor
 
+  @modelof = (x) ->
+    return false unless x instanceof Object
+    for k of x
+      return false unless (@get "bindings.#{k}")?
+    return true
+
   @mixin (require 'events').EventEmitter
 
   @belongsTo = (model, opts) ->
@@ -72,7 +78,9 @@ class SynthModel extends (require './object')
     @name = @meta 'name'
     console.assert @name?,
       "Model must have a 'name' metadata specified for construction"
-    @id = uuid.v4() # every model instance has a unique ID
+    @id = (@get 'id') ? @uuid() # every model instance has a unique ID
+
+  uuid: -> uuid.v4()
 
   fetch: (key) -> @meta "records.#{key}"
 

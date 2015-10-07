@@ -88,7 +88,7 @@ class SynthProperty extends (require './meta')
 
     #console.log "setting #{value} normalized to #{nval}"
     console.assert (@validate nval) is true,
-      "unable to validate passed in '#{nval}' as type '#{@opts.type}'"
+      "unable to validate passed in '#{nval}' as type '#{@opts.type}' with errors: #{nval?.errors}"
 
     @isDirty = switch
       when not cval? and nval? then true
