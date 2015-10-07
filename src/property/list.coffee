@@ -31,7 +31,13 @@ class ListProperty extends (require '../property')
         return item
     undefined
     
-  push: -> @set @value.concat arguments...
+  push: ->
+    items = @normalize [].concat arguments...
+    unless @validate items
+      errors = items.reduce ((a,b) -> a.concat b.errors... ), []
+      throw new Error "[list:push] validation errors: #{errors}"
+    @set @value.concat items
+    return items
 
   remove: (keys...) ->
     query = ListProperty.objectify @opts.key, [].concat keys...

@@ -61,9 +61,9 @@ Array::pushRecord = (record) ->
 
 class SynthProperty extends (require './meta')
   @set synth: 'property', config: true, mandatory: false, unique: false, private: false
-  @set options: [ 'type', 'subtype', 'key', 'units',
-    'mandatory', 'unique', 'private', 'config', 'default',
-    'normalizer', 'validator', 'serializer' ]
+  @set options: [ 'type', 'subtype', 'key', 'units', 'mandatory',
+    'unique', 'private', 'config', 'default', 'normalizer',
+    'validator', 'serializer' ]
 
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
