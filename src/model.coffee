@@ -41,9 +41,10 @@ class ModelRegistry extends Registry
 uuid = require 'node-uuid'
 
 class SynthModel extends (require './object')
-  @set synth: 'model', name: undefined, records: undefined
+  @set synth: 'model', name: undefined, records: {}
 
   @instanceof = (x) ->
+    return false unless x?
     x instanceof this or x instanceof this.__super__?.constructor
 
   @mixin (require 'events').EventEmitter
@@ -68,10 +69,14 @@ class SynthModel extends (require './object')
     @attach 'save',    (resolve, reject) -> return resolve this
     @attach 'destroy', (resolve, reject) -> return resolve this
     super
+    @name = @meta 'name'
+    console.assert @name?,
+      "Model must have a 'name' metadata specified for construction"
     @id = uuid.v4() # every model instance has a unique ID
 
   fetch: (key) -> @meta "records.#{key}"
-  find:  (query) -> null
+
+  find:  (query) -> (v for k, v of (@meta 'records')).where query
   match: (query) ->
     for k, v of query
       x = (@access k)?.normalize (@get k)

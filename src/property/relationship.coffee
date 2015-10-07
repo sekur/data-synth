@@ -18,4 +18,12 @@ class RelationshipProperty extends (require '../property')
       when 'belongsTo' then 'string'
       when 'hasMany' then 'array'
 
+  fetch: (key) ->
+    return unless key?
+    [ name, key ] = key.split ':'
+    unless key?
+      key = name
+      name = @model.get 'name'
+    (@model::fetch key) ? (@seek synth: 'store')?.find name, key
+
 module.exports = RelationshipProperty

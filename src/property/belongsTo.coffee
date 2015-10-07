@@ -2,7 +2,7 @@
 class BelongsToProperty extends (require './relationship')
   @set kind: 'belongsTo'
 
-  access: -> @model::fetch super
+  access: -> @fetch super
 
   set: (value) ->
     try super
@@ -11,14 +11,20 @@ class BelongsToProperty extends (require './relationship')
   normalize: (value=@get()) ->
     switch
       when not value? then undefined
-      when @model.instanceof value  then value.get 'id'
-      when typeof value is 'string' then value
+      when @model.instanceof value then switch
+        when value.name is @model.get 'name' then value.id
+        else "#{value.name}:#{value.id}"
+      when typeof value is 'string' then switch
+        when /.*:.*/.test value
+          [ name, key ] = value.split ':'
+          if name is @model.get 'name' then key else value
+        else value
       when typeof value is 'number' then "#{value}"
       when value instanceof Array then undefined
       else undefined
 
   validate:  (value=@get()) ->
-    (super value) is true and (not value? or @model.instanceof (@model::fetch value))
+    (super value) is true and (not value? or @model.instanceof @fetch value)
 
   serialize: (opts={}) ->
     value=@get()

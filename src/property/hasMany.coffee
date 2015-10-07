@@ -3,7 +3,7 @@ BelongsToProperty = require './belongsTo'
 class HasManyProperty extends (require './relationship')
   @set kind: 'hasMany', unique: true, default: []
 
-  access: -> (super.map (e) => @model::fetch e).filter (e) -> e?
+  access: -> (super.map (e) => @fetch e).filter (e) -> e?
 
   push: (value) ->
     list = @get()
@@ -22,7 +22,7 @@ class HasManyProperty extends (require './relationship')
       else undefined
 
   validate: (value=@get()) ->
-    (super value) is true and value.every (e) => @model.instanceof (@model::fetch e)
+    (super value) is true and value.every (e) => @model.instanceof (@fetch e)
 
   serialize: (opts={}) ->
     value=@get()
