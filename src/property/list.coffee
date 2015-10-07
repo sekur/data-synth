@@ -7,9 +7,6 @@ class ListProperty extends (require '../property')
       @constructor.set type: 'array', subtype: (@constructor.get 'type')
     super
 
-    @opts.max = (Number) @opts['max-elements'] unless @opts['max-elements'] is 'unbounded'
-    @opts.min = (Number) @opts['min-elements']
-
   get: (key) ->
     list = (super null).map (x) -> x.get?() ? x
     return list unless key?
@@ -65,11 +62,9 @@ class ListProperty extends (require '../property')
       else x
 
   validate: (value=@value) ->
-    bounds = (x) =>
-      unless @opts.max?
-        x >= @opts.min
-      else
-        @opts.min <= x <= @opts.max
+    max = (Number) @opts['max-elements'] unless @opts['max-elements'] is 'unbounded'
+    min = (Number) @opts['min-elements']
+    bounds = (x) -> unless max? then x >= min else min <= x <= max
 
     super and (bounds value.length) and value.every (x) =>
       switch
