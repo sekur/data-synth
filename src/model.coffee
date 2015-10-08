@@ -119,13 +119,6 @@ class SynthModel extends (require './object')
   rollback: ->
     # TBD
 
-
-  # The below `invoke` for the `SynthModel` is a magical
-  # one-liner... Figuring out how it works is an exercise left to the
-  # reader. :-)
-  # invoke: (event, args...) ->
-  #   Promise.all (@listeners event).map (f) => super ([f].concat args)... 
-
   RelationshipProperty = (require './property/relationship')
 
   getRelationships: (kind) ->

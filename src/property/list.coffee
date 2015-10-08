@@ -42,22 +42,24 @@ class ListProperty extends (require '../property')
 
   Meta = require '../meta'
   normalize: ->
+    # TODO: this one can use some refactoring...
     super.map (x) => switch
       when (Meta.instanceof @opts.subtype)
         switch
           when (x instanceof @opts.subtype) then x
           when (@opts.subtype.get 'synth') is 'model'
-            switch
-              when @opts.subtype.instanceof x then x
-              when x instanceof Meta
-                new @opts.subtype x.get(), this
-              when @opts.subtype.modelof x
-                new @opts.subtype x, this
-              when x instanceof Object
-                for name, data of x
-                  res = (@seek synth: 'store')?.create name, data
-                  break;
-                res
+            if @opts.subtype.instanceof x then x
+            else
+              record = switch
+                when x instanceof Meta
+                  new @opts.subtype x.get(), this
+                when @opts.subtype.modelof x
+                  new @opts.subtype x, this
+                when x instanceof Object
+                  for name, data of x then break
+                  (@seek synth: 'store')?.create name, data
+              record.save()
+              record
           else new @opts.subtype x, this
       else x
 

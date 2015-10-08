@@ -279,6 +279,10 @@ output
         this
 
       invoke: (input, args...) ->
+        if input instanceof Array
+          # a magical one-liner...
+          return Promise.all input.map (f) => @invoke ([f].concat args)...
+
         method = input if input instanceof Function
         method ?= @methods?[input]
         unless method instanceof Function
