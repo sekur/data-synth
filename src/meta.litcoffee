@@ -134,7 +134,7 @@ The following `set/merge` provide meta data update mechanisms.
           when target instanceof Function and obj instanceof Function
             target.mixin? obj
           when target instanceof Array and obj instanceof Array
-            Array.prototype.push.apply target, obj
+            @set key, target.concat obj...
           when target instanceof Object and obj instanceof Object
             @set "#{key}.#{k}", v for k, v of obj
           when typeof target is typeof obj
@@ -205,7 +205,8 @@ output
       constructor: (value, parent) ->
         return class extends Meta if @constructor is Object
         @parent = parent if parent?
-        @constructor.rebind k, v for k, v of (@constructor.get 'overrides')
+        for k, override of (@constructor.get 'overrides')
+          @constructor.rebind k, v for k, v of override
         @attach k, v for k, v of (@constructor.get 'bindings')
         @set value if value?
 
