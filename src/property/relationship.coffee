@@ -1,8 +1,8 @@
 assert = require 'assert'
 
 class RelationshipProperty extends (require '../property')
-  @set synth: 'relation', embedded: false
-  @merge options: [ 'model', 'kind', 'embedded' ]
+  @set synth: 'relation', embedded: false, 'require-instance': false
+  @merge options: [ 'model', 'kind', 'embedded', 'require-instance' ]
 
   constructor: ->
     super

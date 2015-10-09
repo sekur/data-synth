@@ -24,7 +24,7 @@ class BelongsToProperty extends (require './relationship')
       else undefined
 
   validate:  (value=@get()) ->
-    (super value) is true and (not value? or @model.instanceof @fetch value)
+    (super value) is true and (not value? or not @opts['require-instance'] or @model.instanceof @fetch value)
 
   serialize: (opts={}) ->
     value=@get()

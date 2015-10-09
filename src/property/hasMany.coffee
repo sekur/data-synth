@@ -22,7 +22,7 @@ class HasManyProperty extends (require './relationship')
       else undefined
 
   validate: (value=@get()) ->
-    (super value) is true and value.every (e) => @model.instanceof (@fetch e)
+    (super value) is true and value.every (e) => not @opts['require-instance'] or @model.instanceof (@fetch e)
 
   serialize: (opts={}) ->
     value=@get()

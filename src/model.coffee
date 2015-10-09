@@ -78,6 +78,7 @@ class SynthModel extends (require './object')
     @name = @meta 'name'
     console.assert @name?,
       "Model must have a 'name' metadata specified for construction"
+    @store = @parent # every model should have a parent that is it's datastore
     @id = (@get 'id') ? @uuid() # every model instance has a unique ID
 
   uuid: -> uuid.v4()

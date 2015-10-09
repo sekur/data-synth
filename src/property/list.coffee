@@ -50,15 +50,18 @@ class ListProperty extends (require '../property')
           when (@opts.subtype.get 'synth') is 'model'
             if @opts.subtype.instanceof x then x
             else
-              record = switch
+              store = @seek synth: 'store'
+              return unless store?
+              [ key, value ] = switch
                 when x instanceof Meta
-                  new @opts.subtype x.get(), this
+                  [ (@opts.subtype.get 'name'), x.get() ]
                 when @opts.subtype.modelof x
-                  new @opts.subtype x, this
+                  [ (@opts.subtype.get 'name'), x ]
                 when x instanceof Object
                   for name, data of x then break
-                  (@seek synth: 'store')?.create name, data
-              record.save()
+                  [ name, data ]
+              record = store.create key, value
+              record?.save()
               record
           else new @opts.subtype x, this
       else x
