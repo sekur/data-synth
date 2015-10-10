@@ -1,47 +1,7 @@
-Registry = require './registry'
-
-class ModelRegistryProperty extends Registry.Property
-
-  constructor: (@model, opts, obj) -> super 'object', opts, obj
-
-  match: (query, keys=false) ->
-    switch
-      when query instanceof Array then super
-      when query instanceof Object
-        for k, v of @get() when v.match query
-          if keys then k else v
-      else
-        super
-
-  serialize: (opts={}) ->
-    ids: Object.keys(@value)
-    numRecords: Object.keys(@value).length
-
-class ModelRegistry extends Registry
-
-  @Property = ModelRegistryProperty
-
-  register: (model, opts) ->
-    # may not need this...
-    # model.meta ?= name: model.name
-    # model.meta.name ?= model.name
-    super model.meta.name, new ModelRegistryProperty model, opts, this
-
-  add: (records...) ->
-    obj = {}
-    obj[record.get('id')] = record for record in records when record instanceof Model
-    super record.constructor.meta.name, obj
-
-  remove: (records...) ->
-    query = (record.get('id') for record in records when record instanceof Model)
-    super record.constructor.meta.name, query
-
-  contains: (key) -> (@access key)
-
 uuid = require 'node-uuid'
 
 class SynthModel extends (require './object')
-  @set synth: 'model', name: undefined, records: {}
+  @set synth: 'model', name: undefined, records: undefined
 
   @instanceof = (x) ->
     return false unless x?
@@ -95,20 +55,18 @@ class SynthModel extends (require './object')
 
   toString: -> "#{@meta 'name'}:#{@id}"
 
-  set: ->
-    # before setting ANY new value, keep track of any changes
-    # only after successful 'save' the transaction logs are cleared
-    super
-
-  # This is a convenince wrapper to invoke internal 'save' method
   save: ->
     @invoke 'save', arguments...
     .then (res) =>
       @id = (@get 'id') ? @id
       @set 'id', @id
-      @clearDirty()
+      super
       @constructor.set "records.#{@id}", this
       return res
+
+  rollback: ->
+    # TBD
+    super
 
   destroy: ->
     @invoke 'destroy', arguments...
@@ -116,9 +74,6 @@ class SynthModel extends (require './object')
       #record.destroy() for record in @get '_bindings'
       @constructor.delete "records.#{@id}"
       return res
-
-  rollback: ->
-    # TBD
 
   RelationshipProperty = (require './property/relationship')
 

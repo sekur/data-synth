@@ -95,6 +95,8 @@ class SynthProperty extends (require './meta')
       when @opts.type is 'array' then not nval.equals cval
       when cval is nval then false
       else true
+
+    @lastValue ?= cval if @isDirty
     @value = nval
 
   normalize: (value, opts=@opts) ->
@@ -156,5 +158,8 @@ class SynthProperty extends (require './meta')
           else e
       else
         value
+
+  save:     -> @isDirty = false; @lastValue = undefined
+  rollback: -> if @isDirty then @value = @lastValue; @save()
 
 module.exports = SynthProperty

@@ -69,7 +69,6 @@ obj(s) into itself.
           @merge obj.extract 'bindings'
         this
 
-
 ## meta data operators (on this.__meta__)
 
 The following `get/extract/match` provide meta data retrieval mechanisms.
@@ -210,9 +209,6 @@ output
         @attach k, v for k, v of (@constructor.get 'bindings')
         @set value if value?
 
-      valueOf:  -> @constructor.extract()
-      toString: -> @meta 'name' ? @meta 'synth'
-
       attach: (key, val) ->
         switch
           when (Meta.instanceof val)
@@ -226,6 +222,15 @@ output
           else
             @properties ?= {}
             @properties[key] = val
+
+      detach: (key) ->
+        match = @access key
+        return unless match?
+
+        [ rest..., key ] = tokenize key
+        if match?.parent?.properties?.hasOwnProperty key
+          delete match.parent.properties[key]
+        return match
 
       fork: (f, args...) -> f?.apply? (new @constructor @get()), args
 
@@ -291,5 +296,8 @@ output
 
         new Promise (resolve, reject) =>
           method.apply this, args.concat [ resolve, reject ]
+
+      valueOf:  -> @constructor.extract()
+      toString: -> @meta 'name' ? @meta 'synth'
         
     module.exports = Meta

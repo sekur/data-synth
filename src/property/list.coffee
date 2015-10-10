@@ -64,6 +64,8 @@ class ListProperty extends (require '../property')
               record?.save()
               record
           else new @opts.subtype x, this
+      when @opts.subtype instanceof Function
+        @opts.subtype x
       else x
 
   validate: (value=@value) ->
@@ -74,10 +76,12 @@ class ListProperty extends (require '../property')
     super and (bounds value.length) and value.every (x) =>
       switch
         when not @opts.subtype? then true
-        when @opts.subtype instanceof Function
+        when Meta.instanceof @opts.subtype
           check = x instanceof @opts.subtype
           check = @opts.subtype.instanceof x unless check
           check and (if x.validate? then x.validate() else true)
+        when @opts.subtype instanceof Function
+          x is (@opts.subtype x)
         else
           typeof x is @opts.subtype
 
