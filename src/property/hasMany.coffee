@@ -3,7 +3,11 @@ BelongsToProperty = require './belongsTo'
 class HasManyProperty extends (require './relationship')
   @set kind: 'hasMany', unique: true, default: []
 
-  access: -> (super.map (e) => @fetch e).filter (e) -> e?
+  access: (key) ->
+    if key is '*'
+      (@value.map (e) => @fetch e).filter (e) -> e?
+    else
+      @fetch key if key in @value
 
   push: (value) ->
     list = @get()

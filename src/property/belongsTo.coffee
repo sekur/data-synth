@@ -2,7 +2,7 @@
 class BelongsToProperty extends (require './relationship')
   @set kind: 'belongsTo'
 
-  access: -> @fetch super
+  access: (key) -> @fetch key if key is @value
 
   set: (value) ->
     try super

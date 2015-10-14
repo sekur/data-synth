@@ -25,7 +25,7 @@ PUBLIC access methods for working directly with internal models registry
         return unless model?
         switch
           when not (query instanceof Object) then model::fetch query
-          when query.id? then model::fetch query.id
+          when query.id? and not (query.id instanceof Array) then model::fetch query.id
           else model::find query
 
       update: (type, id, data) -> null
