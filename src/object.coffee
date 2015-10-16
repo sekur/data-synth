@@ -45,6 +45,14 @@ class SynthObject extends Meta
     (@every (k) -> (Meta.objectify k, @serialize? opts) unless @opts?.private)
     .reduce ((a, b) -> Meta.copy a, b), {}
 
+  diff: ->
+    changes = (@every (key) ->
+      diff = @diff?()
+      Meta.objectify key, diff if diff?
+    ).reduce ((a,b) -> Meta.copy a, b), {}
+    return null unless Object.keys(changes).length > 0
+    changes
+
   save:     -> @every -> @save?()
   rollback: -> @every -> @rollback?()
 

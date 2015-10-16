@@ -1,4 +1,17 @@
-Array::equals = (x) -> @length is x.length and @every (e, i) -> e is x[i]
+Array::equals = (x) ->
+  compare = (a, b) ->
+    a = a.get() if a?.get instanceof Function
+    b = b.get() if b?.get instanceof Function
+    (typeof a is typeof b) and switch
+      when a instanceof Array then a.equals b
+      when a instanceof Object
+        res = true
+        for k, v of a
+          unless compare v, b[k]
+            res = false; break
+        res
+      else a is b
+  @length is x.length and @every (e, i) -> compare e, x[i]
 
 Array::unique = (key) ->
   return @ unless @length > 0
@@ -92,7 +105,7 @@ class SynthProperty extends (require './meta')
 
     @isDirty = switch
       when not cval? and nval? then true
-      when @opts.type is 'array' then not nval.equals cval
+      when @opts.type is 'array' then not (nval.equals cval)
       when cval is nval then false
       else true
 
@@ -158,7 +171,7 @@ class SynthProperty extends (require './meta')
           else e
       else
         value
-
+  diff:     -> @value if @isDirty
   save:     -> @isDirty = false; @lastValue = undefined
   rollback: -> if @isDirty then @value = @lastValue; @save()
 
