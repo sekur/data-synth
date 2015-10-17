@@ -10,9 +10,16 @@ class ListProperty extends (require '../property')
   get: (key) ->
     list = (super null).map (x) -> x.get?() ? x
     return list unless key?
+
     mkey = @opts.key
-    for item in list when key is item[mkey]
-      return item
+    for item in list
+      ikey = item[mkey]
+      match = switch typeof ikey
+        when 'number'  then ikey is (Number) key
+        when 'string'  then ikey is (String) key
+        when 'boolean' then ikey is (Boolean) key
+        else ikey is key
+      return item if match is true
     undefined
 
   match: (query={}) ->
@@ -84,5 +91,21 @@ class ListProperty extends (require '../property')
           x is (@opts.subtype x)
         else
           typeof x is @opts.subtype
+
+  diff: ->
+    return super unless Meta.instanceof @opts.subtype
+    diff = (@value.map (x) =>
+      changes = x.diff?()
+      # attach the 'key' for this item for diff so we know the
+      # identifier for the object that got changed
+      changes?[@opts.key] = x.get @opts.key
+      changes
+    ).filter (e) -> e?
+    return null unless diff.length > 0
+    diff
+
+  save: ->
+    return super unless Meta.instanceof @opts.subtype
+    @value.forEach (e) -> e.save?()
 
 module.exports = ListProperty
