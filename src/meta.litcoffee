@@ -204,9 +204,15 @@ output
       constructor: (value, parent) ->
         return class extends Meta if @constructor is Object
         @parent = parent if parent?
-        for k, override of (@constructor.get 'overrides')
-          @constructor.rebind k, v for k, v of override
-        @attach k, v for k, v of (@constructor.get 'bindings')
+        bindings = (@constructor.extract 'bindings').bindings
+        bindings ?= {}
+        for idx, override of (@constructor.get 'overrides')
+          for k, v of override
+            if v instanceof Function
+              bindings[k] = v.call @constructor, bindings[k]
+            else
+              bindings[k] = v
+        @attach k, v for k, v of bindings
         @set value if value?
 
       attach: (key, val) ->

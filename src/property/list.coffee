@@ -9,7 +9,7 @@ class ListProperty extends (require '../property')
 
   get: (key) ->
     list = (super null).map (x) -> x.get?() ? x
-    return list unless key?
+    return list unless key? and key isnt '*'
 
     mkey = @opts.key
     for item in list
@@ -28,6 +28,7 @@ class ListProperty extends (require '../property')
       .where query
 
   access: (key) ->
+    return @value unless key? and key isnt '*'
     mkey = @opts.key
     for item in @value
       check = (item.get? mkey) ? item[mkey]
