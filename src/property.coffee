@@ -121,7 +121,7 @@ class SynthProperty extends (require './meta')
       when (SynthProperty.instanceof opts.type) and not (value instanceof opts.type)
         new opts.type value, this
       when opts.type instanceof Function
-        opts.type value
+        opts.type.call this, value
       when opts.type is 'string' and typeof value isnt 'string'
         "#{value}"
       when opts.type is 'date' and typeof value is 'string'
@@ -149,7 +149,10 @@ class SynthProperty extends (require './meta')
       when SynthProperty.instanceof opts.type
         value instanceof opts.type
       when opts.type instanceof Function
-        value is (opts.type value)
+        if value.validate?
+          value.validate()
+        else
+          value is (opts.type.call this, value)
       else switch opts.type
         when 'string', 'number', 'boolean', 'object'
           typeof value is opts.type
@@ -171,7 +174,7 @@ class SynthProperty extends (require './meta')
           else e
       else
         value
-  diff:     -> @value if @isDirty
+  diff:     -> @get() if @isDirty
   save:     -> @isDirty = false; @lastValue = undefined
   rollback: -> if @isDirty then @value = @lastValue; @save()
 

@@ -1,3 +1,5 @@
+Meta = require '../meta'
+
 class ListProperty extends (require '../property')
   @set synth: 'list', unique: true, 'max-elements': 'unbounded', 'min-elements': 0
   @merge options: [ 'max-elements', 'min-elements', 'ordered-by' ]
@@ -30,11 +32,17 @@ class ListProperty extends (require '../property')
   access: (key) ->
     return @value unless key? and key isnt '*'
     mkey = @opts.key
+    res = []
     for item in @value
+      val = (item.get? key) ? item[key]
+      if val?
+        res.push val
+        continue
+
       check = (item.get? mkey) ? item[mkey]
       if key is check
         return item
-    undefined
+    return if res.length > 0 then res else undefined
     
   push: ->
     items = @normalize [].concat arguments...
@@ -48,7 +56,6 @@ class ListProperty extends (require '../property')
     query = ListProperty.objectify @opts.key, [].concat keys...
     @set @value.without query
 
-  Meta = require '../meta'
   normalize: ->
     # TODO: this one can use some refactoring...
     super.map (x) => switch
