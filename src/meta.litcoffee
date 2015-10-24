@@ -139,7 +139,7 @@ The following `set/merge` provide meta data update mechanisms.
           when typeof target is typeof obj
             @set key, obj
           else
-            console.warn "performing merge for '#{key}' with existing value type (#{typeof target}) conflicting with passed-in value (#{typeof obj})"
+            console.log "performing merge for '#{key}' with existing value type (#{typeof target}) conflicting with passed-in value (#{typeof obj})"
             @set key, obj
         this
 
