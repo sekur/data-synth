@@ -72,7 +72,9 @@ Array::pushRecord = (record) ->
 # Built-in types:
 # date, boolean, string, and array
 
-class SynthProperty extends (require './meta')
+Meta = require './meta'
+
+class SynthProperty extends Meta
   @set synth: 'property', config: true, mandatory: false, unique: false, private: false
   @set options: [ 'type', 'subtype', 'key', 'units', 'mandatory',
     'unique', 'private', 'config', 'default', 'normalizer',
@@ -87,7 +89,11 @@ class SynthProperty extends (require './meta')
       when @opts.default instanceof Function then @opts.default.call @parent
       else @opts.default
 
-  get: -> v = super; v?.get?() ? v
+  get: ->
+    v = super
+    #return v?.get?() ? v
+    if v instanceof Meta then v.get()
+    else v
 
   set: (value) ->
     console.assert @opts.type?,

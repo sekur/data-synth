@@ -180,6 +180,18 @@ function.
         else
           @bind key, target
 
+      @override: (key, obj) ->
+        return this unless key?
+        if typeof key is 'object'
+          (@override k, v) for k, v of key
+          return this
+        [ key, rest... ] = tokenize key
+        if rest.length > 0
+          (@get "bindings.#{key}")?.override? (rest.join '.'), obj
+        else
+          @merge "overrides.#{key}", [ obj ]
+        this
+
 The following `reduce` provides meta data extrapolation by collapsing
 nested `Meta` instances into object format for singular JS object
 output
@@ -206,12 +218,13 @@ output
         @parent = parent if parent?
         bindings = (@constructor.extract 'bindings').bindings
         bindings ?= {}
-        for idx, override of (@constructor.get 'overrides')
-          for k, v of override
-            if v instanceof Function
-              bindings[k] = v.call @constructor, bindings[k]
-            else
-              bindings[k] = v
+        for k, overrides of (@constructor.get 'overrides')
+          console.log "overriding #{k}"
+          for override in overrides
+            bindings[k] = switch
+              when override instanceof Function
+                override.call @constructor, bindings[k]
+              else override
         @attach k, v for k, v of bindings
         @set value if value?
 
