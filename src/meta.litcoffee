@@ -189,7 +189,8 @@ function.
         if rest.length > 0
           (@get "bindings.#{key}")?.override? (rest.join '.'), obj
         else
-          @merge "overrides.#{key}", [ obj ]
+          obj = [ obj ] unless obj instanceof Array
+          @merge "overrides.#{key}", obj
         this
 
 The following `reduce` provides meta data extrapolation by collapsing
