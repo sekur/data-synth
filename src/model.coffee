@@ -56,12 +56,14 @@ class SynthModel extends (require './object')
   toString: -> "#{@meta 'name'}:#{@id}"
 
   save: ->
+    @emit 'saving'
     @invoke 'save', arguments...
     .then (res) =>
       @id = (@get 'id') ? @id
       @set 'id', @id
       super
       @constructor.set "records.#{@id}", this
+      @emit 'saved'
       return res
 
   rollback: ->
@@ -69,10 +71,12 @@ class SynthModel extends (require './object')
     super
 
   destroy: ->
+    @emit 'destroying'
     @invoke 'destroy', arguments...
     .then (res) =>
       #record.destroy() for record in @get '_bindings'
       @constructor.delete "records.#{@id}"
+      @emit 'destroyed'
       return res
 
   RelationshipProperty = (require './property/relationship')
@@ -80,18 +84,5 @@ class SynthModel extends (require './object')
   getRelationships: (kind) ->
     @everyProperty (key) -> this if this instanceof RelationshipProperty
     .filter (x) -> x? and (not kind? or kind is (x.constructor.get 'kind'))
-
-  ###*
-  # `bind` subjugates passed in records to be bound to the lifespan of
-  # the current model record.
-  #
-  # When this current model record is destroyed, all bound dependents
-  # will also be destroyed.
-  ###
-
-  bind: (records...) ->
-    for record in records
-      continue unless record? and record instanceof SynthModel
-      (@access 'children').push record.save()
 
 module.exports = SynthModel
