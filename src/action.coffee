@@ -26,8 +26,6 @@ class SynthAction extends (require './object')
 
     return Promise.all promises
       .then (res) ->
-        console.log "promise all returned with"
-        console.log res
         for action in res
           console.log "got back #{action} from listener"
         return res

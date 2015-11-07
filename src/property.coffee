@@ -80,6 +80,8 @@ class SynthProperty extends Meta
     'unique', 'private', 'config', 'default', 'normalizer',
     'validator', 'serializer' ]
 
+  assert = require 'assert'
+
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
@@ -96,7 +98,7 @@ class SynthProperty extends Meta
     else v
 
   set: (value) ->
-    console.assert @opts.type?,
+    assert @opts.type?,
       "cannot set a value to a property without type"
       
     value ?= switch
@@ -106,7 +108,7 @@ class SynthProperty extends Meta
     nval = @normalize value
 
     #console.log "setting #{value} normalized to #{nval}"
-    console.assert (@validate nval) is true,
+    assert (@validate nval) is true,
       "unable to validate passed in '#{nval}' as type '#{@opts.type}' with errors: #{nval?.errors}"
 
     @isDirty = switch
