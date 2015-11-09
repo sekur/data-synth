@@ -1,13 +1,14 @@
 Meta = require '../meta'
 
 class ListProperty extends (require '../property')
-  @set synth: 'list', unique: true, 'max-elements': 'unbounded', 'min-elements': 0
+  @set synth: 'list', unique: true, 'max-elements': undefined, 'min-elements': 0
   @merge options: [ 'max-elements', 'min-elements', 'ordered-by' ]
 
   constructor: ->
     unless (@constructor.get 'type') is 'array'
       @constructor.set type: 'array', subtype: (@constructor.get 'type')
     super
+    @opts['max-elements'] ?= 'unbounded'
 
   get: (key) ->
     list = (super null).map (x) -> x.get?() ? x

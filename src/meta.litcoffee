@@ -220,7 +220,7 @@ output
         bindings = (@constructor.extract 'bindings').bindings
         bindings ?= {}
         for k, overrides of (@constructor.get 'overrides')
-          console.log "overriding #{k}"
+          console.debug? "overriding #{k}"
           for override in overrides
             bindings[k] = switch
               when override instanceof Function
