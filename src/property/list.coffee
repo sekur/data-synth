@@ -40,9 +40,13 @@ class ListProperty extends (require '../property')
         res.push val
         continue
 
-      check = (item.get? mkey) ? item[mkey]
-      if key is check
-        return item
+      ikey = (item.get? mkey) ? item[mkey]
+      match = switch typeof ikey
+        when 'number'  then ikey is (Number) key
+        when 'string'  then ikey is (String) key
+        when 'boolean' then ikey is (Boolean) key
+        else ikey is key
+      return item if match is true
     return if res.length > 0 then res else undefined
     
   push: ->
@@ -54,7 +58,10 @@ class ListProperty extends (require '../property')
     return items
 
   remove: (keys...) ->
-    query = ListProperty.objectify @opts.key, [].concat keys...
+    # XXX - need to convert passed-in keys to the format of the key values...
+    # keys.map (x) => @opts.subtype.get 
+    
+    query = Meta.objectify @opts.key, [].concat keys...
     @set @value.without query
 
   normalize: ->
