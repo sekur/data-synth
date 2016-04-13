@@ -25,11 +25,6 @@ class SynthModel extends (require './object')
       @set model: model
       @merge opts
 
-  @action = (func, opts) ->
-    class extends (require './property/action')
-      @set func: func
-      @merge opts
-
   constructor: ->
     # register a default 'save' and 'destroy' handler event (can be overridden)
     @attach 'save',    (resolve, reject) -> return resolve this
