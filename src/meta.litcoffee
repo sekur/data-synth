@@ -159,8 +159,8 @@ function.
         [ key, rest... ] = tokenize key
         if rest.length > 0
           res = (@get "bindings.#{key}")?.bind? (rest.join '.'), obj
-          console.assert res?,
-            "unable to bind to non-existent prefix #{key}"
+          unless res?
+            throw new Error "unable to bind to non-existent prefix #{key}"
         else
           unless (@get "bindings.#{key}")? then @set "bindings.#{key}", obj
         this

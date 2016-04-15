@@ -9,8 +9,8 @@ class ComputedProperty extends (require '../property')
     #   @constructor.include inherit
 
     super
-    console.assert @opts.func instanceof Function,
-      "cannot instantiate a new ComputedProperty without a function"
+    unless @opts.func instanceof Function
+      throw new Error "cannot instantiate a new ComputedProperty without a function"
     @cachedOn = new Date() if @opts.cache > 0
 
   get: ->

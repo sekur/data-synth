@@ -31,8 +31,8 @@ class SynthModel extends (require './object')
     @attach 'destroy', (resolve, reject) -> return resolve this
     super
     @name = @meta 'name'
-    console.assert @name?,
-      "Model must have a 'name' metadata specified for construction"
+    unless @name?
+      throw new Error "Model must have a 'name' metadata specified for construction"
     @store = @parent # every model should have a parent that is it's datastore
     @id = (@get 'id') ? @uuid() # every model instance has a unique ID
 

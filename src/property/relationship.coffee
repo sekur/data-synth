@@ -1,5 +1,3 @@
-assert = require 'assert'
-
 class RelationshipProperty extends (require '../property')
   @set synth: 'relation', embedded: false, 'require-instance': false
   @merge options: [ 'model', 'kind', 'embedded', 'require-instance' ]
@@ -11,9 +9,9 @@ class RelationshipProperty extends (require '../property')
       when @opts.model instanceof Function then @opts.model
       when typeof @opts.model is 'string' then "noooo"
 
-    assert @model instanceof Function,
-        "cannot instantiate a new relationship without proper model class"
-        
+    unless @model instanceof Function
+      throw new Error "cannot instantiate a new relationship without proper model class"
+
     @opts.type = switch @opts.kind
       when 'belongsTo' then 'string'
       when 'hasMany' then 'array'

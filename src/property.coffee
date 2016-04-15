@@ -80,8 +80,6 @@ class SynthProperty extends Meta
     'unique', 'private', 'config', 'default', 'normalizer',
     'validator', 'serializer' ]
 
-  assert = require 'assert'
-
   constructor: ->
     @opts = @constructor.extract.apply @constructor, @constructor.get 'options'
     @isDirty = false
@@ -98,9 +96,9 @@ class SynthProperty extends Meta
     else v
 
   set: (value) ->
-    assert @opts.type?,
-      "cannot set a value to a property without type"
-      
+    unless @opts.type?
+      throw new Error "cannot set a value to a property without type"
+
     value ?= switch
       when @opts.default instanceof Function then @opts.default.call @parent
       else @opts.default
@@ -108,8 +106,8 @@ class SynthProperty extends Meta
     nval = @normalize value
 
     #console.log "setting #{value} normalized to #{nval}"
-    assert (@validate nval) is true,
-      "unable to validate passed in '#{nval}' as type '#{@opts.type}' with errors: #{nval?.errors}"
+    unless (@validate nval) is true
+      throw new Error "unable to validate passed in '#{nval}' as type '#{@opts.type}' with errors: #{nval?.errors}"
 
     @isDirty = switch
       when not cval? and nval? then true
@@ -124,7 +122,7 @@ class SynthProperty extends Meta
     if opts.normalizer instanceof Function
       return opts.normalizer.call this, value
     return unless value?
-    
+
     switch
       when (SynthProperty.instanceof opts.type) and not (value instanceof opts.type)
         new opts.type value, this
